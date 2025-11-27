@@ -1,11 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAutenticacion } from './hooks/useAutenticacion'
 import { Login } from './paginas/autenticacion/Login'
 import { RestablecerContrasena } from './paginas/autenticacion/RestablecerContrasena'
 import { servicioAutenticacion } from './servicios/autenticacion'
+import { supabase } from './configuracion/supabase'
 
 function App() {
   const { usuario, cargando } = useAutenticacion()
+
+  // Manejar callback de OAuth
+  useEffect(() => {
+    // Escuchar cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        console.log('Usuario autenticado con Google:', session.user.email)
+        // La redirección se manejará automáticamente por el componente
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   if (cargando) {
     return (
@@ -29,7 +44,7 @@ function App() {
         {/* Login */}
         <Route 
           path="/login" 
-          element={usuario ? <Navigate to="/" /> : <Login />} 
+          element={usuario ? <Navigate to="/" replace /> : <Login />} 
         />
         
         {/* Dashboard - Protegido */}
@@ -46,11 +61,11 @@ function App() {
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
                       ContaAPI
                     </h1>
-                    <h2 className="text-2xl text-gray-700 mb-6">
-                      ¡Bienvenido {usuario.email}!
+                    <h2 className="text-2xl text-gray-700 mb-2">
+                      ¡Bienvenido!
                     </h2>
                     <p className="text-gray-600 mb-8">
-                      Has iniciado sesión correctamente
+                      {usuario.email}
                     </p>
                     
                     <button 
@@ -65,7 +80,7 @@ function App() {
                 </div>
               </div>
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" replace />
             )
           } 
         />
