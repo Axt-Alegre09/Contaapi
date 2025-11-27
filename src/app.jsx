@@ -5,17 +5,16 @@ import { Login } from './paginas/autenticacion/Login'
 import { RestablecerContrasena } from './paginas/autenticacion/RestablecerContrasena'
 import { servicioAutenticacion } from './servicios/autenticacion'
 import { supabase } from './configuracion/supabase'
+import { LogOut, LayoutDashboard } from 'lucide-react'
 
 function App() {
   const { usuario, cargando } = useAutenticacion()
 
   // Manejar callback de OAuth
   useEffect(() => {
-    // Escuchar cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        console.log('Usuario autenticado con Google:', session.user.email)
-        // La redirección se manejará automáticamente por el componente
+        console.log('Usuario autenticado:', session.user.email)
       }
     })
 
@@ -26,9 +25,11 @@ function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg animate-pulse">
-            <span className="text-3xl">🧾</span>
-          </div>
+          <img 
+            src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo.jpg" 
+            alt="ContaAPI Logo" 
+            className="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg animate-pulse object-contain"
+          />
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
         </div>
       </div>
@@ -53,29 +54,75 @@ function App() {
           element={
             usuario ? (
               <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-                <div className="container mx-auto px-4 py-8">
-                  <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white max-w-2xl mx-auto text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
-                      <span className="text-3xl">🧾</span>
+                {/* Header */}
+                <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
+                  <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo.jpg" 
+                        alt="ContaAPI Logo" 
+                        className="w-12 h-12 rounded-xl shadow-md object-contain"
+                      />
+                      <div>
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                          ContaAPI
+                        </h1>
+                        <p className="text-sm text-gray-600">Sistema Contable Profesional</p>
+                      </div>
                     </div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                      ContaAPI
-                    </h1>
-                    <h2 className="text-2xl text-gray-700 mb-2">
-                      ¡Bienvenido!
-                    </h2>
-                    <p className="text-gray-600 mb-8">
-                      {usuario.email}
-                    </p>
                     
                     <button 
                       onClick={async () => {
                         await servicioAutenticacion.cerrarSesion()
                       }}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg shadow-blue-500/50"
+                      className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md"
                     >
+                      <LogOut className="w-4 h-4" />
                       Cerrar Sesión
                     </button>
+                  </div>
+                </header>
+
+                {/* Main Content */}
+                <div className="container mx-auto px-4 py-8">
+                  <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white max-w-4xl mx-auto">
+                    <div className="text-center mb-8">
+                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+                        <LayoutDashboard className="w-10 h-10 text-white" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                        ¡Bienvenido!
+                      </h2>
+                      <p className="text-gray-600 mb-4">
+                        {usuario.email}
+                      </p>
+                      <div className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
+                        ✓ Sesión activa
+                      </div>
+                    </div>
+
+                    {/* Módulos del sistema */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                      <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 hover:shadow-lg transition-all cursor-pointer">
+                        <h3 className="font-bold text-blue-900 text-lg mb-2">📊 Contabilidad</h3>
+                        <p className="text-blue-700 text-sm">Gestión de asientos y libros contables</p>
+                      </div>
+                      
+                      <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200 hover:shadow-lg transition-all cursor-pointer">
+                        <h3 className="font-bold text-purple-900 text-lg mb-2">📋 Operaciones Fiscales</h3>
+                        <p className="text-purple-700 text-sm">Formularios y cumplimiento tributario</p>
+                      </div>
+                      
+                      <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border border-green-200 hover:shadow-lg transition-all cursor-pointer">
+                        <h3 className="font-bold text-green-900 text-lg mb-2">🏢 Bienes de Uso</h3>
+                        <p className="text-green-700 text-sm">Activos fijos y depreciaciones</p>
+                      </div>
+                      
+                      <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl border border-orange-200 hover:shadow-lg transition-all cursor-pointer">
+                        <h3 className="font-bold text-orange-900 text-lg mb-2">🏦 Bancos</h3>
+                        <p className="text-orange-700 text-sm">Conciliaciones bancarias</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

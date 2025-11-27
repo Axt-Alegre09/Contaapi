@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { servicioAutenticacion } from '../../servicios/autenticacion'
-import { Input } from '../../componentes/comunes/Input'
-import { Boton } from '../../componentes/comunes/Boton'
+import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 
 export function RecuperarContrasena({ onVolver }) {
   const [email, setEmail] = useState('')
@@ -41,7 +40,7 @@ export function RecuperarContrasena({ onVolver }) {
         <div className="w-full max-w-md">
           <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-              <span className="text-3xl">✅</span>
+              <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
             
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -58,9 +57,10 @@ export function RecuperarContrasena({ onVolver }) {
             
             <button
               onClick={onVolver}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
             >
-              ← Volver al inicio de sesión
+              <ArrowLeft className="w-4 h-4" />
+              Volver al inicio de sesión
             </button>
           </div>
         </div>
@@ -80,9 +80,11 @@ export function RecuperarContrasena({ onVolver }) {
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white">
           {/* Logo y título */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
-              <span className="text-3xl">🔐</span>
-            </div>
+            <img 
+              src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
+              alt="ContaAPI Logo" 
+              className="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-lg object-contain"
+            />
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Recuperar Contraseña
             </h1>
@@ -100,22 +102,28 @@ export function RecuperarContrasena({ onVolver }) {
 
           {/* Formulario */}
           <form onSubmit={manejarSubmit} className="space-y-4">
-            <Input
-              nombre="email"
-              tipo="email"
-              placeholder="Correo electrónico"
-              valor={email}
-              onChange={(e) => {
-                setEmail(e.target.value)
-                setError('')
-              }}
-              icono="✉️"
-              error=""
-            />
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="email"
+                name="email"
+                placeholder="Correo electrónico"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setError('')
+                }}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+            </div>
 
-            <Boton tipo="primary" disabled={cargando}>
+            <button
+              type="submit"
+              disabled={cargando}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {cargando ? 'Enviando...' : 'Enviar enlace de recuperación'}
-            </Boton>
+            </button>
           </form>
 
           {/* Volver */}
@@ -123,9 +131,10 @@ export function RecuperarContrasena({ onVolver }) {
             <button
               type="button"
               onClick={onVolver}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
             >
-              ← Volver al inicio de sesión
+              <ArrowLeft className="w-4 h-4" />
+              Volver al inicio de sesión
             </button>
           </div>
         </div>
