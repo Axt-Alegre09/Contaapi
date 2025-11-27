@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { servicioAutenticacion } from '../../servicios/autenticacion'
 import { Input } from '../../componentes/comunes/Input'
 import { Boton } from '../../componentes/comunes/Boton'
+import { RecuperarContrasena } from './RecuperarContaseña'
 
 export function Login() {
   const [esRegistro, setEsRegistro] = useState(false)
@@ -13,6 +14,12 @@ export function Login() {
   const [errores, setErrores] = useState({})
   const [cargando, setCargando] = useState(false)
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' })
+  const [mostrarRecuperar, setMostrarRecuperar] = useState(false)
+
+  // Mostrar componente de recuperación si está activo
+  if (mostrarRecuperar) {
+    return <RecuperarContrasena onVolver={() => setMostrarRecuperar(false)} />
+  }
 
   const manejarCambio = (e) => {
     setFormData({
@@ -172,6 +179,19 @@ export function Login() {
             >
               {cargando ? 'Procesando...' : (esRegistro ? 'Crear cuenta' : 'Iniciar sesión')}
             </Boton>
+
+            {/* Enlace de recuperar contraseña */}
+            {!esRegistro && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setMostrarRecuperar(true)}
+                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+            )}
           </form>
 
           {/* Divisor */}

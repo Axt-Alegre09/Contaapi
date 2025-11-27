@@ -59,5 +59,15 @@ export const servicioAutenticacion = {
     
     if (error) throw error
     return data
+  },
+
+  // Actualizar contraseña
+  async actualizarContrasena(nuevaPassword) {
+    const { data, error } = await supabase.auth.updateUser({
+      password: nuevaPassword
+    })
+    
+    if (error) throw error
+    return data
   }
 }
