@@ -95,15 +95,15 @@ function App() {
                       </div>
                     </div>
 
-                    <div className="mb-8 text-center">
-                      
-                        href="/planes"
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
-                      >
-                        <CreditCard className="w-5 h-5" />
-                        Ver Planes y Precios
-                      </a>
-                    </div>
+                  <div className="mb-8 text-center">
+                    <Link
+                      to="/planes"
+                      className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+                    >
+                      <CreditCard className="w-5 h-5" />
+                      Ver Planes y Precios
+                    </Link>
+                  </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                       <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 hover:shadow-lg transition-all cursor-pointer">
