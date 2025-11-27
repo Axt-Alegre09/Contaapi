@@ -6,17 +6,20 @@ export function useAutenticacion() {
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
-    // Verificar sesión actual
+    // Obtener sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUsuario(session?.user ?? null)
       setCargando(false)
     })
 
     // Escuchar cambios de autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUsuario(session?.user ?? null)
-      setCargando(false)
-    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth event:', event, session?.user?.email)
+        setUsuario(session?.user ?? null)
+        setCargando(false)
+      }
+    )
 
     return () => subscription.unsubscribe()
   }, [])
