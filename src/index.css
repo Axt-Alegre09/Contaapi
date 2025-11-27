@@ -11,7 +11,10 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #f8fafc;
+  background-image: url('https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg')!important;
+  background-size: cover;      
+  background-position: center; 
+  background-repeat: no-repeat; 
 }
 
 /* Clases personalizadas para el sistema */
