@@ -116,21 +116,23 @@ export function Login() {
         {/* Card principal */}
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white">
           {/* Logo y título */}
-          <div className="text-center mb-8">
-            <div className="mb-4">
-              <img 
-                src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
-                alt="ContaAPI Logo" 
-                className="w-48 h-48 mx-auto rounded-2xl shadow-lg object-contain"
-              />
+            {/* Logo y título */}
+            <div className="text-center mb-8">
+              <div className="mb-6 bg-transparent">
+                <img 
+                  src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
+                  alt="ContaAPI Logo" 
+                  className="w-64 h-64 mx-auto object-contain drop-shadow-lg"
+                  style={{ background: 'transparent' }}
+                />
+              </div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                ContaAPI
+              </h1>
+              <p className="text-gray-600 mt-2">
+                {esRegistro ? 'Crea tu cuenta' : 'Inicia sesión en tu cuenta'}
+              </p>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              ContaAPI
-            </h1>
-            <p className="text-gray-600 mt-2">
-              {esRegistro ? 'Crea tu cuenta' : 'Inicia sesión en tu cuenta'}
-            </p>
-          </div>
 
           {/* Mensajes */}
           {mensaje.texto && (

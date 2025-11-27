@@ -81,22 +81,23 @@ export function RestablecerContrasena() {
 
       <div className="w-full max-w-md relative">
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white">
-          {/* Logo y título */}
-          <div className="text-center mb-8">
-            <div className="mb-4">
-              <img 
-                src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
-                alt="ContaAPI Logo" 
-                className="w-40 h-40 mx-auto rounded-2xl shadow-lg object-contain"
-              />
-            </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Nueva Contraseña
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Ingresa tu nueva contraseña
-            </p>
-          </div>
+              {/* Logo y título */}
+              <div className="text-center mb-8">
+                <div className="mb-6 bg-transparent">
+                  <img 
+                    src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
+                    alt="ContaAPI Logo" 
+                    className="w-52 h-52 mx-auto object-contain drop-shadow-lg"
+                    style={{ background: 'transparent' }}
+                  />
+                </div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Nueva Contraseña
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  Ingresa tu nueva contraseña
+                </p>
+              </div>
 
           {/* Mensaje de error */}
           {error && (
