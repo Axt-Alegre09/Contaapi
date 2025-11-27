@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { servicioAutenticacion } from '../../servicios/autenticacion'
-import { Input } from '../../componentes/comunes/Input'
-import { Boton } from '../../componentes/comunes/Boton'
 import { RecuperarContrasena } from './RecuperarContaseña'
-import { Mail, Lock, User } from 'lucide-react'
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
 
 export function Login() {
   const [esRegistro, setEsRegistro] = useState(false)
@@ -16,6 +14,7 @@ export function Login() {
   const [cargando, setCargando] = useState(false)
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' })
   const [mostrarRecuperar, setMostrarRecuperar] = useState(false)
+  const [mostrarPassword, setMostrarPassword] = useState(false)
 
   // Mostrar componente de recuperación si está activo
   if (mostrarRecuperar) {
@@ -118,11 +117,13 @@ export function Login() {
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white">
           {/* Logo y título */}
           <div className="text-center mb-8">
-            <img 
-              src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
-              alt="ContaAPI Logo" 
-              className="w-32 h-32 mx-auto mb-4 rounded-2xl shadow-lg object-contain"
-            />
+            <div className="mb-4">
+              <img 
+                src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
+                alt="ContaAPI Logo" 
+                className="w-48 h-48 mx-auto rounded-2xl shadow-lg object-contain"
+              />
+            </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               ContaAPI
             </h1>
@@ -178,13 +179,24 @@ export function Login() {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
-                type="password"
+                type={mostrarPassword ? "text" : "password"}
                 name="password"
                 placeholder="Contraseña"
                 value={formData.password}
                 onChange={manejarCambio}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setMostrarPassword(!mostrarPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {mostrarPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
               {errores.password && (
                 <p className="text-red-500 text-xs mt-1">{errores.password}</p>
               )}

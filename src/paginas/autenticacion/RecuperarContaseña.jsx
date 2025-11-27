@@ -80,11 +80,13 @@ export function RecuperarContrasena({ onVolver }) {
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white">
           {/* Logo y título */}
           <div className="text-center mb-8">
-            <img 
-              src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
-              alt="ContaAPI Logo" 
-              className="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-lg object-contain"
-            />
+            <div className="mb-4">
+              <img 
+                src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
+                alt="ContaAPI Logo" 
+                className="w-40 h-40 mx-auto rounded-2xl shadow-lg object-contain"
+              />
+            </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Recuperar Contraseña
             </h1>

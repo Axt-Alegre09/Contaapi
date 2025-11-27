@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { servicioAutenticacion } from '../../servicios/autenticacion'
-import { Lock, CheckCircle } from 'lucide-react'
+import { Lock, CheckCircle, Eye, EyeOff } from 'lucide-react'
 
 export function RestablecerContrasena() {
   const [password, setPassword] = useState('')
@@ -8,6 +8,8 @@ export function RestablecerContrasena() {
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
   const [exitoso, setExitoso] = useState(false)
+  const [mostrarPassword, setMostrarPassword] = useState(false)
+  const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false)
 
   const manejarSubmit = async (e) => {
     e.preventDefault()
@@ -81,11 +83,13 @@ export function RestablecerContrasena() {
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white">
           {/* Logo y título */}
           <div className="text-center mb-8">
-            <img 
-              src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
-              alt="ContaAPI Logo" 
-              className="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-lg object-contain"
-            />
+            <div className="mb-4">
+              <img 
+                src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo2login.jpg" 
+                alt="ContaAPI Logo" 
+                className="w-40 h-40 mx-auto rounded-2xl shadow-lg object-contain"
+              />
+            </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Nueva Contraseña
             </h1>
@@ -106,7 +110,7 @@ export function RestablecerContrasena() {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
-                type="password"
+                type={mostrarPassword ? "text" : "password"}
                 name="password"
                 placeholder="Nueva contraseña"
                 value={password}
@@ -114,14 +118,25 @@ export function RestablecerContrasena() {
                   setPassword(e.target.value)
                   setError('')
                 }}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setMostrarPassword(!mostrarPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {mostrarPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
             </div>
 
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
-                type="password"
+                type={mostrarConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 placeholder="Confirmar contraseña"
                 value={confirmPassword}
@@ -129,8 +144,19 @@ export function RestablecerContrasena() {
                   setConfirmPassword(e.target.value)
                   setError('')
                 }}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmPassword(!mostrarConfirmPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {mostrarConfirmPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
             </div>
 
             <button
