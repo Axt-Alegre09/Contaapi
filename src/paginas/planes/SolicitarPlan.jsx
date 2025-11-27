@@ -1,173 +1,217 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { servicioPlanes } from '../../servicios/planes'
-import { Upload, Building2, Mail, Phone, CreditCard, FileText, User, AlertCircle, CheckCircle2, MessageSquare } from 'lucide-react'
+import { supabase } from '../../configuracion/supabase'
+import { ArrowLeft, Building2, User, Mail, Phone, CreditCard, FileText, Upload, CheckCircle, XCircle, AlertCircle, X, Landmark } from 'lucide-react'
 
 export function SolicitarPlan() {
   const navigate = useNavigate()
   const location = useLocation()
-  const plan = location.state?.plan
+  const { plan } = location.state || {}
 
-  const [formData, setFormData] = useState({
-    nombre_completo: '',
-    email: '',
+  const [formulario, setFormulario] = useState({
+    nombreEmpresa: '',
+    ruc: '',
     telefono: '',
-    ruc_ci: '',
-    nombre_empresa: '',
-    numero_transaccion: '',
-    banco_utilizado: ''
+    direccion: '',
+    nombreContacto: '',
+    emailContacto: '',
+    banco: '',
+    numeroTransaccion: ''
   })
 
   const [archivo, setArchivo] = useState(null)
-  const [errores, setErrores] = useState({})
+  const [vistaPrevia, setVistaPrevia] = useState(null)
   const [cargando, setCargando] = useState(false)
-  const [enviado, setEnviado] = useState(false)
+  const [notificacion, setNotificacion] = useState(null)
 
-  if (!plan) {
-    navigate('/planes')
-    return null
+  // TUS datos bancarios (del negocio)
+  const datosBancarios = [
+    {
+      banco: 'Banco Itaú',
+      titular: 'Marcos Adrian Alegre Rodriguez',
+      aliasCi: '5773660',
+      numeroCuenta: '25253184',
+      ci: '5773660',
+      moneda: 'Guaraníes'
+    },
+    {
+      banco: 'Banco Ueno',
+      titular: 'Marcos Adrian Alegre Rodriguez',
+      aliasCelular: '+595992544305',
+      numeroCuenta: '61967185',
+      ci: '5773660',
+      moneda: 'Guaraníes'
+    }
+  ]
+
+  // Lista de bancos disponibles en Paraguay
+  const bancosDisponibles = [
+    'Banco Itaú',
+    'Banco Continental',
+    'Banco Regional',
+    'Banco Familiar',
+    'Banco Atlas',
+    'Banco GNB',
+    'Bancop',
+    'Vision Banco',
+    'Banco Basa',
+    'Banco Rio',
+    'Banco Ueno'
+  ]
+
+  const mostrarNotificacion = (tipo, mensaje) => {
+    setNotificacion({ tipo, mensaje })
+    setTimeout(() => setNotificacion(null), 5000)
+  }
+
+  const validarImagen = (archivo) => {
+    const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    const tamañoMaximo = 5 * 1024 * 1024 // 5MB
+
+    if (!tiposPermitidos.includes(archivo.type)) {
+      mostrarNotificacion('error', 'Solo se permiten imágenes (JPG, PNG, WEBP)')
+      return false
+    }
+
+    if (archivo.size > tamañoMaximo) {
+      mostrarNotificacion('error', 'La imagen no debe superar los 5MB')
+      return false
+    }
+
+    return true
+  }
+
+  const manejarArchivoSeleccionado = (e) => {
+    const archivoSeleccionado = e.target.files[0]
+    
+    if (archivoSeleccionado && validarImagen(archivoSeleccionado)) {
+      setArchivo(archivoSeleccionado)
+      
+      const lector = new FileReader()
+      lector.onloadend = () => {
+        setVistaPrevia(lector.result)
+      }
+      lector.readAsDataURL(archivoSeleccionado)
+    } else {
+      e.target.value = null
+    }
+  }
+
+  const eliminarArchivo = () => {
+    setArchivo(null)
+    setVistaPrevia(null)
+    const input = document.getElementById('comprobante')
+    if (input) input.value = null
   }
 
   const manejarCambio = (e) => {
-    setFormData({
-      ...formData,
+    setFormulario({
+      ...formulario,
       [e.target.name]: e.target.value
     })
-    if (errores[e.target.name]) {
-      setErrores({ ...errores, [e.target.name]: '' })
-    }
-  }
-
-  const manejarArchivo = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      // Validar tipo de archivo
-      const tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
-      if (!tiposPermitidos.includes(file.type)) {
-        setErrores({ ...errores, archivo: 'Solo se permiten archivos JPG, PNG o PDF' })
-        return
-      }
-      
-      // Validar tamaño (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrores({ ...errores, archivo: 'El archivo no debe superar los 5MB' })
-        return
-      }
-      
-      setArchivo(file)
-      setErrores({ ...errores, archivo: '' })
-    }
   }
 
   const validarFormulario = () => {
-    const nuevosErrores = {}
-
-    if (!formData.nombre_completo.trim()) {
-      nuevosErrores.nombre_completo = 'El nombre completo es requerido'
+    if (!formulario.nombreContacto.trim()) {
+      mostrarNotificacion('error', 'El nombre de contacto es obligatorio')
+      return false
     }
-
-    if (!formData.email.trim()) {
-      nuevosErrores.email = 'El email es requerido'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      nuevosErrores.email = 'Email inválido'
+    if (!formulario.emailContacto.trim() || !formulario.emailContacto.includes('@')) {
+      mostrarNotificacion('error', 'Ingresa un email válido')
+      return false
     }
-
-    if (!formData.telefono.trim()) {
-      nuevosErrores.telefono = 'El teléfono es requerido'
+    if (!formulario.telefono.trim()) {
+      mostrarNotificacion('error', 'El teléfono es obligatorio')
+      return false
     }
-
-    if (!formData.banco_utilizado) {
-      nuevosErrores.banco_utilizado = 'Selecciona un banco'
+    if (!formulario.banco) {
+      mostrarNotificacion('error', 'Selecciona un banco')
+      return false
     }
-
-    if (!formData.numero_transaccion.trim()) {
-      nuevosErrores.numero_transaccion = 'El número de transacción es requerido'
+    if (!formulario.numeroTransaccion.trim()) {
+      mostrarNotificacion('error', 'El número de transacción es obligatorio')
+      return false
     }
-
     if (!archivo) {
-      nuevosErrores.archivo = 'Debes subir el comprobante de pago'
+      mostrarNotificacion('error', 'Debes subir el comprobante de pago')
+      return false
     }
-
-    setErrores(nuevosErrores)
-    return Object.keys(nuevosErrores).length === 0
+    return true
   }
 
-  const manejarSubmit = async (e) => {
+  const manejarEnvio = async (e) => {
     e.preventDefault()
-    
+
     if (!validarFormulario()) return
 
     setCargando(true)
 
     try {
-      // Crear la solicitud primero
-      const solicitud = await servicioPlanes.crearSolicitudPago({
-        plan_id: plan.id,
-        nombre_completo: formData.nombre_completo,
-        email: formData.email,
-        telefono: formData.telefono,
-        ruc_ci: formData.ruc_ci || null,
-        nombre_empresa: formData.nombre_empresa || null,
-        monto: plan.precio_guaranies,
-        numero_transaccion: formData.numero_transaccion,
-        banco_utilizado: formData.banco_utilizado
-      })
+      // 1. Subir el comprobante
+      const nombreArchivo = `${Date.now()}_${archivo.name}`
+      const { data: datosSubida, error: errorSubida } = await supabase.storage
+        .from('Contaapi')
+        .upload(`comprobantes/${nombreArchivo}`, archivo)
 
-      // Subir el comprobante
-      const comprobanteUrl = await servicioPlanes.subirComprobante(archivo, solicitud.id)
+      if (errorSubida) throw errorSubida
 
-      // Actualizar la solicitud con la URL del comprobante
-      await servicioPlanes.actualizarComprobante(solicitud.id, comprobanteUrl)
+      // 2. Obtener URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('Contaapi')
+        .getPublicUrl(`comprobantes/${nombreArchivo}`)
 
-      setEnviado(true)
+      // 3. Obtener usuario actual
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // 4. Guardar solicitud en la tabla solicitudes_pago
+      const { error: errorInsertar } = await supabase
+        .from('solicitudes_pago')
+        .insert([{
+          user_id: user.id,
+          plan_id: plan.id,
+          nombre_completo: formulario.nombreContacto,
+          email: formulario.emailContacto,
+          telefono: formulario.telefono,
+          ruc_ci: formulario.ruc || null,
+          nombre_empresa: formulario.nombreEmpresa || null,
+          monto: plan.precio_guaranies,
+          comprobante_url: publicUrl,
+          numero_transaccion: formulario.numeroTransaccion,
+          banco_utilizado: formulario.banco,
+          estado: 'pendiente'
+        }])
+
+      if (errorInsertar) throw errorInsertar
+
+      mostrarNotificacion('success', '¡Solicitud enviada exitosamente!')
+      
+      setTimeout(() => {
+        navigate('/planes')
+      }, 2000)
+
     } catch (error) {
-      console.error('Error al enviar solicitud:', error)
-      alert('Error al enviar la solicitud. Por favor intenta nuevamente.')
+      console.error('Error:', error)
+      mostrarNotificacion('error', `Error al enviar la solicitud: ${error.message}`)
     } finally {
       setCargando(false)
     }
   }
 
-  const formatearPrecio = (precio) => {
-    return new Intl.NumberFormat('es-PY', {
-      style: 'currency',
-      currency: 'PYG',
-      minimumFractionDigits: 0
-    }).format(precio)
-  }
-
-  const abrirWhatsApp = () => {
-    window.open('https://wa.me/595992544305', '_blank')
-  }
-
-  // Pantalla de confirmación
-  if (enviado) {
+  // Validar que existe el plan
+  if (!plan || !plan.id) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-            <CheckCircle2 className="w-10 h-10 text-green-600" />
-          </div>
-          
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
-            ¡Solicitud Recibida!
-          </h2>
-          
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-8 border border-white text-center max-w-md">
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Plan no seleccionado</h2>
           <p className="text-gray-600 mb-6">
-            Hemos recibido tu solicitud de pago. Recibirás un email de confirmación en las próximas 24-48 horas.
+            Debes seleccionar un plan primero para poder continuar.
           </p>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-            <p className="text-sm text-blue-800">
-              Mientras tanto, puedes seguir usando tu cuenta demo sin restricciones.
-            </p>
-          </div>
-
           <button
-            onClick={() => navigate('/')}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+            onClick={() => navigate('/planes')}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all"
           >
-            Volver al Dashboard
+            Ver Planes Disponibles
           </button>
         </div>
       </div>
@@ -175,311 +219,364 @@ export function SolicitarPlan() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Completar Compra
-          </h1>
-          <p className="text-gray-600">
-            Plan {plan.nombre} - {formatearPrecio(plan.precio_guaranies)}
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Notificación personalizada */}
+      {notificacion && (
+        <div className="fixed top-4 right-4 z-50 max-w-md animate-slide-in">
+          <div className={`rounded-xl shadow-2xl p-4 flex items-start gap-3 ${
+            notificacion.tipo === 'success' ? 'bg-green-50 border-2 border-green-500' :
+            notificacion.tipo === 'error' ? 'bg-red-50 border-2 border-red-500' :
+            'bg-yellow-50 border-2 border-yellow-500'
+          }`}>
+            {notificacion.tipo === 'success' && <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />}
+            {notificacion.tipo === 'error' && <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />}
+            {notificacion.tipo === 'warning' && <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0" />}
+            
+            <p className={`flex-1 font-semibold ${
+              notificacion.tipo === 'success' ? 'text-green-800' :
+              notificacion.tipo === 'error' ? 'text-red-800' :
+              'text-yellow-800'
+            }`}>
+              {notificacion.mensaje}
+            </p>
+            
+            <button 
+              onClick={() => setNotificacion(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="container mx-auto px-4 py-6 max-w-[1600px]">
+        {/* Header Compacto */}
+        <div className="mb-6">
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-4 border border-white flex items-center justify-between">
+            <button
+              onClick={() => navigate('/planes')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            
+            <div className="flex-1 text-center">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Completar Solicitud
+              </h1>
+              <p className="text-sm text-gray-600">
+                {plan.nombre} - Gs. {plan.precio_guaranies?.toLocaleString() || '0'}
+              </p>
+            </div>
+            
+            <div className="w-8"></div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Columna izquierda - Datos bancarios */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Building2 className="w-6 h-6 text-blue-600" />
-                Datos para Transferencia
-              </h3>
-
-              {/* Banco Itaú */}
-              <div className="mb-6 p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
-                <h4 className="font-bold text-orange-900 mb-3">Banco Itaú</h4>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-semibold text-orange-800">Titular:</span>
-                    <p className="text-orange-900">Marcos Adrian Alegre Rodriguez</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-orange-800">Alias CI:</span>
-                    <p className="text-orange-900 font-mono">5773660</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-orange-800">Nro. Cuenta:</span>
-                    <p className="text-orange-900 font-mono">25253184</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-orange-800">CI:</span>
-                    <p className="text-orange-900 font-mono">5773660</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-orange-800">Moneda:</span>
-                    <p className="text-orange-900">Guaraníes</p>
-                  </div>
+        <form onSubmit={manejarEnvio}>
+          {/* Datos para Transferencia - Ancho Completo */}
+          <div className="mb-6">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 backdrop-blur-lg rounded-2xl shadow-lg p-6 border-2 border-green-200">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 bg-green-500 rounded-lg">
+                  <Landmark className="w-6 h-6 text-white" />
                 </div>
+                <h2 className="text-xl font-bold text-gray-800">Datos para Transferencia</h2>
               </div>
 
-              {/* Banco Ueno */}
-              <div className="mb-6 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                <h4 className="font-bold text-blue-900 mb-3">Banco Ueno</h4>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-semibold text-blue-800">Titular:</span>
-                    <p className="text-blue-900">Marcos Adrian Alegre Rodriguez</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {datosBancarios.map((cuenta, index) => (
+                  <div key={index} className="p-5 bg-white rounded-xl border border-green-200 shadow-sm">
+                    <p className="font-bold text-green-700 text-lg mb-3">{cuenta.banco}</p>
+                    <div className="space-y-2">
+                      <p className="text-gray-700 text-sm"><strong>Titular:</strong> {cuenta.titular}</p>
+                      {cuenta.aliasCi && <p className="text-gray-700 text-sm"><strong>Alias CI:</strong> {cuenta.aliasCi}</p>}
+                      {cuenta.aliasCelular && <p className="text-gray-700 text-sm"><strong>Alias Celular:</strong> {cuenta.aliasCelular}</p>}
+                      <p className="text-gray-700 text-sm"><strong>Nro. Cuenta:</strong> {cuenta.numeroCuenta}</p>
+                      <p className="text-gray-700 text-sm"><strong>CI:</strong> {cuenta.ci}</p>
+                      <p className="text-gray-700 text-sm"><strong>Moneda:</strong> {cuenta.moneda}</p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-semibold text-blue-800">Alias Celular:</span>
-                    <p className="text-blue-900 font-mono">+595992544305</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-blue-800">Nro. Cuenta:</span>
-                    <p className="text-blue-900 font-mono">61967185</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-blue-800">CI:</span>
-                    <p className="text-blue-900 font-mono">5773660</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-blue-800">Moneda:</span>
-                    <p className="text-blue-900">Guaraníes</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
-              {/* Concepto importante */}
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl mb-4">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-semibold text-yellow-900 mb-1">IMPORTANTE</p>
-                    <p className="text-xs text-yellow-800">
-                      Incluir tu email en el concepto de la transferencia para procesar más rápido tu solicitud.
-                    </p>
-                  </div>
-                </div>
+              <div className="mt-5 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                <p className="text-sm text-yellow-800">
+                  <strong>💡 Importante:</strong> Incluye tu email en el concepto de la transferencia para procesar más rápido tu solicitud.
+                </p>
               </div>
-
-              {/* Botón WhatsApp */}
-              <button
-                type="button"
-                onClick={abrirWhatsApp}
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
-              >
-                <MessageSquare className="w-5 h-5" />
-                Contactar por WhatsApp
-              </button>
             </div>
           </div>
 
-          {/* Columna derecha - Formulario */}
-          <div className="lg:col-span-2">
-            <form onSubmit={manejarSubmit} className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-6">Datos de Contacto</h3>
-
-              <div className="space-y-4">
-                {/* Nombre completo */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Nombre Completo *
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      name="nombre_completo"
-                      value={formData.nombre_completo}
-                      onChange={manejarCambio}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="Ej: Juan Pérez"
-                    />
+          {/* 2 Columnas: Formularios */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Columna Izquierda */}
+            <div className="space-y-6">
+              {/* Datos de Contacto */}
+              <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <User className="w-6 h-6 text-purple-600" />
                   </div>
-                  {errores.nombre_completo && (
-                    <p className="text-red-500 text-xs mt-1">{errores.nombre_completo}</p>
-                  )}
+                  <h2 className="text-xl font-bold text-gray-800">Datos de Contacto</h2>
                 </div>
 
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email *
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={manejarCambio}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="ejemplo@correo.com"
-                    />
-                  </div>
-                  {errores.email && (
-                    <p className="text-red-500 text-xs mt-1">{errores.email}</p>
-                  )}
-                </div>
-
-                {/* Teléfono */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Teléfono / WhatsApp *
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="tel"
-                      name="telefono"
-                      value={formData.telefono}
-                      onChange={manejarCambio}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="+595 XXX XXX XXX"
-                    />
-                  </div>
-                  {errores.telefono && (
-                    <p className="text-red-500 text-xs mt-1">{errores.telefono}</p>
-                  )}
-                </div>
-
-                {/* RUC/CI (opcional) */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    RUC / CI (opcional)
-                  </label>
-                  <div className="relative">
-                    <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      name="ruc_ci"
-                      value={formData.ruc_ci}
-                      onChange={manejarCambio}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="Ej: 12345678-9"
-                    />
-                  </div>
-                </div>
-
-                {/* Nombre empresa (opcional) */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Nombre de Empresa (opcional)
-                  </label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      name="nombre_empresa"
-                      value={formData.nombre_empresa}
-                      onChange={manejarCambio}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="Ej: Mi Empresa S.A."
-                    />
-                  </div>
-                </div>
-
-                {/* Banco utilizado */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Banco Utilizado *
-                  </label>
-                  <select
-                    name="banco_utilizado"
-                    value={formData.banco_utilizado}
-                    onChange={manejarCambio}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  >
-                    <option value="">Selecciona un banco</option>
-                    <option value="Itaú">Banco Itaú</option>
-                    <option value="Ueno">Banco Ueno</option>
-                  </select>
-                  {errores.banco_utilizado && (
-                    <p className="text-red-500 text-xs mt-1">{errores.banco_utilizado}</p>
-                  )}
-                </div>
-
-                {/* Número de transacción */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Número de Transacción *
-                  </label>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      name="numero_transaccion"
-                      value={formData.numero_transaccion}
-                      onChange={manejarCambio}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="Ej: TRX123456789"
-                    />
-                  </div>
-                  {errores.numero_transaccion && (
-                    <p className="text-red-500 text-xs mt-1">{errores.numero_transaccion}</p>
-                  )}
-                </div>
-
-                {/* Comprobante */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Comprobante de Pago *
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-colors">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-600 mb-2">
-                      Arrastra tu archivo o haz clic para seleccionar
-                    </p>
-                    <p className="text-xs text-gray-500 mb-3">
-                      JPG, PNG o PDF (máx. 5MB)
-                    </p>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/jpg,application/pdf"
-                      onChange={manejarArchivo}
-                      className="hidden"
-                      id="comprobante"
-                    />
-                    <label
-                      htmlFor="comprobante"
-                      className="inline-block bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold py-2 px-6 rounded-lg cursor-pointer transition-colors"
-                    >
-                      Seleccionar archivo
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nombre Completo <span className="text-red-500">*</span>
                     </label>
-                    {archivo && (
-                      <p className="text-sm text-green-600 mt-3 font-medium">
-                        ✓ {archivo.name}
-                      </p>
-                    )}
+                    <input
+                      type="text"
+                      name="nombreContacto"
+                      value={formulario.nombreContacto}
+                      onChange={manejarCambio}
+                      placeholder="Ej: Juan Pérez"
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    />
                   </div>
-                  {errores.archivo && (
-                    <p className="text-red-500 text-xs mt-1">{errores.archivo}</p>
-                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="email"
+                        name="emailContacto"
+                        value={formulario.emailContacto}
+                        onChange={manejarCambio}
+                        placeholder="ejemplo@correo.com"
+                        required
+                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Teléfono / WhatsApp <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="tel"
+                        name="telefono"
+                        value={formulario.telefono}
+                        onChange={manejarCambio}
+                        placeholder="+595 XXX XXX XXX"
+                        required
+                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Botones */}
-              <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                <button
-                  type="button"
-                  onClick={() => navigate('/planes')}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={cargando}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {cargando ? 'Enviando...' : 'Enviar Solicitud'}
-                </button>
+              {/* Datos de la Empresa */}
+              <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Building2 className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-800">Datos de la Empresa</h2>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nombre de Empresa (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      name="nombreEmpresa"
+                      value={formulario.nombreEmpresa}
+                      onChange={manejarCambio}
+                      placeholder="Ej: Mi Empresa S.A."
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      RUC / CI (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      name="ruc"
+                      value={formulario.ruc}
+                      onChange={manejarCambio}
+                      placeholder="Ej: 12345678-9"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Dirección (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      name="direccion"
+                      value={formulario.direccion}
+                      onChange={manejarCambio}
+                      placeholder="Ej: Av. Principal 123"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
               </div>
-            </form>
+            </div>
+
+            {/* Columna Derecha */}
+            <div className="space-y-6">
+              {/* Datos de Pago */}
+              <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <CreditCard className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-800">Datos de Pago</h2>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Banco Utilizado <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="banco"
+                      value={formulario.banco}
+                      onChange={manejarCambio}
+                      required
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">Selecciona un banco</option>
+                      {bancosDisponibles.map(banco => (
+                        <option key={banco} value={banco}>{banco}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Número de Transacción <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        name="numeroTransaccion"
+                        value={formulario.numeroTransaccion}
+                        onChange={manejarCambio}
+                        placeholder="Ej: TRX123456789"
+                        required
+                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Comprobante de Pago */}
+              <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <Upload className="w-6 h-6 text-indigo-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-800">Comprobante de Pago</h2>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Subir comprobante <span className="text-red-500">*</span>
+                  </label>
+                  
+                  {!vistaPrevia ? (
+                    <label className="block w-full cursor-pointer">
+                      <div className="border-3 border-dashed border-gray-300 rounded-xl p-10 hover:border-indigo-500 hover:bg-indigo-50 transition-all text-center">
+                        <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 font-medium mb-2">
+                          Haz clic para seleccionar
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          JPG, PNG o WEBP (máx. 5MB)
+                        </p>
+                      </div>
+                      <input
+                        id="comprobante"
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        onChange={manejarArchivoSeleccionado}
+                        className="hidden"
+                      />
+                    </label>
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={vistaPrevia}
+                        alt="Vista previa"
+                        className="w-full h-64 object-contain rounded-xl border-2 border-gray-200 bg-gray-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={eliminarArchivo}
+                        className="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                      <p className="text-sm text-gray-600 mt-3 text-center truncate">
+                        {archivo.name}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    <strong>💡 Tip:</strong> Asegúrate de que el comprobante sea legible y contenga todos los datos de la transferencia.
+                  </p>
+                </div>
+              </div>
+
+              {/* Botón de Envío */}
+              <button
+                type="submit"
+                disabled={cargando}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {cargando ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Enviando solicitud...
+                  </span>
+                ) : (
+                  'Enviar Solicitud'
+                )}
+              </button>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
+
+      <style>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   )
 }
