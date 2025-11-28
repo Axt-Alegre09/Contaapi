@@ -32,8 +32,7 @@ export function LayoutPrincipal({ children }) {
 
   // Datos de ejemplo de empresas (luego vendrán de Supabase)
   const empresas = [
-    { id: 1, nombre: 'Mi Empresa S.A.', ruc: '80012345-6' },
-    { id: 2, nombre: 'Comercial ABC', ruc: '80098765-4' },
+    { id: '87a70676-4dc4-4e53-9f89-4df5cdd09302', nombre: 'Mi Empresa Demo', ruc: '80012345-6' },
   ]
 
   const menuItems = [
@@ -42,6 +41,7 @@ export function LayoutPrincipal({ children }) {
       items: [
         { nombre: 'Dashboard', icono: LayoutDashboard, ruta: '/dashboard' },
         { nombre: 'Empresas', icono: Building2, ruta: '/empresas' },
+        { nombre: 'Equipo', icono: Users, ruta: '/equipo' }, // 👈 NUEVO
       ]
     },
     {
@@ -119,7 +119,7 @@ export function LayoutPrincipal({ children }) {
                 <Building2 className="w-5 h-5 text-blue-600" />
                 <div className="text-left">
                   <p className="text-sm font-semibold text-gray-900">
-                    {empresaSeleccionada?.nombre || 'Seleccionar empresa'}
+                    {empresaSeleccionada?.nombre || 'Mi Empresa Demo'}
                   </p>
                   {empresaSeleccionada && (
                     <p className="text-xs text-gray-500">{empresaSeleccionada.ruc}</p>
