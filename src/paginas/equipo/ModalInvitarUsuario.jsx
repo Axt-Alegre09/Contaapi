@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, UserPlus, Mail, Shield } from 'lucide-react'
+import { X, UserPlus, Mail, Shield, CheckCircle } from 'lucide-react'
 import { invitacionesServicio } from '../../servicios/invitacionesServicio'
 
 export function ModalInvitarUsuario({ empresaId, onCerrar, onInvitado }) {
@@ -8,7 +8,6 @@ export function ModalInvitarUsuario({ empresaId, onCerrar, onInvitado }) {
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState(null)
   const [exito, setExito] = useState(false)
-  const [tokenGenerado, setTokenGenerado] = useState(null)
 
   const roles = [
     { value: 'admin', label: 'Administrador', descripcion: 'Acceso completo excepto eliminar la empresa' },
@@ -30,10 +29,9 @@ export function ModalInvitarUsuario({ empresaId, onCerrar, onInvitado }) {
 
     try {
       setCargando(true)
-      const invitacion = await invitacionesServicio.crearInvitacion(empresaId, email, rol)
+      await invitacionesServicio.crearInvitacion(empresaId, email, rol)
       
       setExito(true)
-      setTokenGenerado(invitacion.token)
       
       // Notificar al padre
       onInvitado()
@@ -68,6 +66,7 @@ export function ModalInvitarUsuario({ empresaId, onCerrar, onInvitado }) {
           <button
             onClick={onCerrar}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            disabled={cargando}
           >
             <X className="w-5 h-5 text-gray-600" />
           </button>
@@ -107,7 +106,7 @@ export function ModalInvitarUsuario({ empresaId, onCerrar, onInvitado }) {
                     rol === rolOption.value
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  } ${(cargando || exito) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <input
                     type="radio"
@@ -139,14 +138,19 @@ export function ModalInvitarUsuario({ empresaId, onCerrar, onInvitado }) {
 
           {exito && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-700 font-medium mb-2">
-                ✅ Invitación creada exitosamente
-              </p>
-              <p className="text-xs text-green-600 mb-2">
-                Link de invitación (copia y envía por WhatsApp/email):
-              </p>
-              <div className="bg-white p-2 rounded border border-green-300 break-all text-xs font-mono">
-                {`${window.location.origin}/invitacion/${tokenGenerado}`}
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-green-700 font-medium mb-1">
+                    ¡Invitación enviada exitosamente!
+                  </p>
+                  <p className="text-xs text-green-600">
+                    El usuario <strong>{email}</strong> recibirá un correo con sus credenciales de acceso en los próximos segundos.
+                  </p>
+                  <p className="text-xs text-green-600 mt-2">
+                    💡 El email incluye su contraseña temporal y puede iniciar sesión inmediatamente.
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -156,18 +160,27 @@ export function ModalInvitarUsuario({ empresaId, onCerrar, onInvitado }) {
             <button
               type="button"
               onClick={onCerrar}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
               disabled={cargando}
             >
-              Cancelar
+              {exito ? 'Cerrar' : 'Cancelar'}
             </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={cargando || exito}
-            >
-              {cargando ? 'Enviando...' : exito ? '✓ Enviado' : 'Enviar Invitación'}
-            </button>
+            {!exito && (
+              <button
+                type="submit"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={cargando}
+              >
+                {cargando ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Enviando...
+                  </span>
+                ) : (
+                  'Enviar Invitación'
+                )}
+              </button>
+            )}
           </div>
         </form>
       </div>
