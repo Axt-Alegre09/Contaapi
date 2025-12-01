@@ -1,12 +1,13 @@
 /**
- * Servicio de Invitaciones - Versión Simplificada
+ * Servicio de Invitaciones - Sistema Manual (sin envío automático de emails)
  */
 
 import { supabase } from '../configuracion/supabase'
 
 export const invitacionesServicio = {
   /**
-   * Invitar nuevo usuario - VERSIÓN SIMPLIFICADA
+   * Invitar nuevo usuario - Sistema Manual
+   * Crea el usuario y devuelve las credenciales para que el admin las comparta
    */
   async crearInvitacion(empresaId, email, rol) {
     try {
@@ -29,18 +30,14 @@ export const invitacionesServicio = {
 
       // 2. Eliminar invitación anterior si existe (para permitir reenvíos)
       console.log('🔵 Eliminando invitaciones anteriores...')
-      const { error: deleteError } = await supabase
+      await supabase
         .from('invitaciones_pendientes')
         .delete()
         .eq('email', email)
         .eq('empresa_id', empresaId)
 
-      if (deleteError) {
-        console.warn('⚠️ Error al eliminar invitación anterior:', deleteError)
-        // No lanzar error, continuar
-      }
-
       // 3. Crear invitación
+      // Nota: El password_temporal se genera automáticamente por el trigger
       console.log('🔵 Creando invitación...')
       const { data, error } = await supabase
         .from('invitaciones_pendientes')
@@ -59,7 +56,26 @@ export const invitacionesServicio = {
       }
 
       console.log('✅ Invitación creada:', data)
-      return data
+
+      // 4. Esperar un momento para que el webhook intente ejecutarse
+      // (aunque falle el email, el usuario ya está creado)
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // 5. Obtener la invitación actualizada con el password
+      const { data: invitacionActualizada, error: fetchError } = await supabase
+        .from('invitaciones_pendientes')
+        .select('*')
+        .eq('id', data.id)
+        .single()
+
+      if (fetchError) {
+        console.error('⚠️ Error al obtener invitación actualizada:', fetchError)
+        // Devolver los datos originales si falla
+        return data
+      }
+
+      console.log('✅ Invitación con credenciales:', invitacionActualizada)
+      return invitacionActualizada
 
     } catch (error) {
       console.error('❌ Error en crearInvitacion:', error)
