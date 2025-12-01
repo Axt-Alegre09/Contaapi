@@ -1,63 +1,47 @@
 /**
- * Servicio de Invitaciones - Sistema con Email Automático
- * 
- * El sistema funciona así:
- * 1. Se inserta en invitaciones_pendientes
- * 2. El webhook dispara automáticamente
- * 3. El edge function crea el usuario y envía email con credenciales
- * 4. El usuario puede entrar directamente con las credenciales
+ * Servicio de Invitaciones - Versión Simplificada
  */
 
 import { supabase } from '../configuracion/supabase'
 
 export const invitacionesServicio = {
   /**
-   * Invitar nuevo usuario
-   * Valida email y crea invitación que dispara envío automático de email
+   * Invitar nuevo usuario - VERSIÓN SIMPLIFICADA
    */
   async crearInvitacion(empresaId, email, rol) {
     try {
-      // 1. Verificar si el email ya está registrado
-      const { data: emailExists, error: checkError } = await supabase
-        .rpc('verificar_email_existente', { p_email: email })
+      console.log('🔵 Iniciando invitación:', { empresaId, email, rol })
 
-      if (checkError) {
-        console.error('Error al verificar email:', checkError)
-      } else if (emailExists) {
-        throw new Error('Este email ya está registrado en el sistema.')
+      // 1. Obtener userId actual
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('❌ Error de autenticación:', authError)
+        throw new Error('Error de autenticación: ' + authError.message)
       }
-
-      // 2. Verificar si ya hay una invitación pendiente
-      const { data: invitacionPendiente } = await supabase
-        .from('invitaciones_pendientes')
-        .select('id, email_enviado')
-        .eq('email', email)
-        .eq('empresa_id', empresaId)
-        .maybeSingle()
-
-      if (invitacionPendiente) {
-        if (invitacionPendiente.email_enviado) {
-          throw new Error('Ya existe una invitación enviada a este email.')
-        } else {
-          // Eliminar invitación vieja que no se envió
-          await supabase
-            .from('invitaciones_pendientes')
-            .delete()
-            .eq('id', invitacionPendiente.id)
-        }
-      }
-
-      // 3. Obtener userId actual
-      const { data: { user } } = await supabase.auth.getUser()
+      
       if (!user) {
+        console.error('❌ Usuario no autenticado')
         throw new Error('No estás autenticado')
       }
 
-      // 4. Crear invitación
-      // El webhook automáticamente:
-      // - Creará el usuario
-      // - Enviará email con credenciales
-      // - Actualizará email_enviado = true
+      console.log('✅ Usuario autenticado:', user.id)
+
+      // 2. Eliminar invitación anterior si existe (para permitir reenvíos)
+      console.log('🔵 Eliminando invitaciones anteriores...')
+      const { error: deleteError } = await supabase
+        .from('invitaciones_pendientes')
+        .delete()
+        .eq('email', email)
+        .eq('empresa_id', empresaId)
+
+      if (deleteError) {
+        console.warn('⚠️ Error al eliminar invitación anterior:', deleteError)
+        // No lanzar error, continuar
+      }
+
+      // 3. Crear invitación
+      console.log('🔵 Creando invitación...')
       const { data, error } = await supabase
         .from('invitaciones_pendientes')
         .insert({
@@ -69,12 +53,16 @@ export const invitacionesServicio = {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error al crear invitación:', error)
+        throw new Error('Error al crear invitación: ' + error.message)
+      }
 
+      console.log('✅ Invitación creada:', data)
       return data
 
     } catch (error) {
-      console.error('Error al crear invitación:', error)
+      console.error('❌ Error en crearInvitacion:', error)
       throw error
     }
   },
@@ -113,27 +101,6 @@ export const invitacionesServicio = {
 
     } catch (error) {
       console.error('Error al cancelar invitación:', error)
-      throw error
-    }
-  },
-
-  /**
-   * Reenviar invitación (elimina la anterior y crea una nueva)
-   */
-  async reenviarInvitacion(empresaId, email, rol) {
-    try {
-      // Eliminar invitación anterior
-      await supabase
-        .from('invitaciones_pendientes')
-        .delete()
-        .eq('email', email)
-        .eq('empresa_id', empresaId)
-
-      // Crear nueva invitación
-      return await this.crearInvitacion(empresaId, email, rol)
-
-    } catch (error) {
-      console.error('Error al reenviar invitación:', error)
       throw error
     }
   }
