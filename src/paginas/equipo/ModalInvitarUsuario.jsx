@@ -28,7 +28,7 @@ export function ModalInvitarUsuario({ empresaId, onCerrar, onInvitado }) {
 Has sido invitado como ${getRolLabel(credenciales.rol)}.
 
 📧 Email: ${credenciales.email}
-🔑 Contraseña temporal: ${credenciales.password}
+🔑 Contraseña temporal: ${credenciales.password_temporal}
 
 🔗 Ingresa aquí: ${window.location.origin}/login
 
@@ -67,7 +67,7 @@ Has sido invitado como ${getRolLabel(credenciales.rol)}.
       // Guardar credenciales para mostrar
       setCredenciales({
         email: resultado.email,
-        password: resultado.password_temporal,
+        password_temporal: resultado.password_temporal,
         rol: resultado.rol
       })
       
@@ -246,7 +246,7 @@ Has sido invitado como ${getRolLabel(credenciales.rol)}.
                 <div>
                   <p className="text-xs font-medium text-gray-500 mb-1">Contraseña Temporal</p>
                   <p className="text-sm font-mono bg-gray-50 px-3 py-2 rounded border border-gray-200">
-                    {credenciales.password}
+                    {credenciales.password_temporal}
                   </p>
                 </div>
 
