@@ -117,18 +117,18 @@ export function Login() {
         backgroundAttachment: "fixed",
       }}
     >
-      {/* Capa oscura semi-transparente */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+      {/* Capa oscura semi-transparente CON DARK MODE */}
+      <div className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-[2px]"></div>
 
       {/* Efectos de fondo adicionales */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-60 h-60 sm:w-80 sm:h-80 bg-blue-500/20 rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-60 h-60 sm:w-80 sm:h-80 bg-purple-500/20 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute -top-40 -right-40 w-60 h-60 sm:w-80 sm:h-80 bg-blue-500/20 dark:bg-blue-400/10 rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-60 h-60 sm:w-80 sm:h-80 bg-purple-500/20 dark:bg-purple-400/10 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
       </div>
 
       <div className="w-full max-w-[95%] xs:max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl relative z-10">
-        {/* Card principal */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl p-4 xs:p-6 sm:p-8 border border-white/50">
+        {/* Card principal CON DARK MODE */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl p-4 xs:p-6 sm:p-8 border border-white/50 dark:border-gray-700/50">
           {/* Logo y título */}
           <div className="text-center mb-4 xs:mb-6 sm:mb-8">
             <div className="mb-3 xs:mb-4 sm:mb-6 bg-transparent">
@@ -142,20 +142,20 @@ export function Login() {
             <h1 className="text-2xl xs:text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               ContaAPI
             </h1>
-            <p className="text-sm xs:text-base text-gray-700 mt-1 xs:mt-2 px-2 font-medium">
+            <p className="text-sm xs:text-base text-gray-700 dark:text-gray-300 mt-1 xs:mt-2 px-2 font-medium">
               {esRegistro ? "Crea tu cuenta" : "Inicia sesión en tu cuenta"}
             </p>
           </div>
 
-          {/* Mensajes */}
+          {/* Mensajes CON DARK MODE */}
           {mensaje.texto && (
             <div
               className={`
             mb-4 xs:mb-6 p-3 xs:p-4 rounded-xl text-xs xs:text-sm font-medium
             ${
               mensaje.tipo === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-red-50 text-red-700 border border-red-200"
+                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
             }
           `}
             >
@@ -163,21 +163,21 @@ export function Login() {
             </div>
           )}
 
-          {/* Formulario */}
+          {/* Formulario CON DARK MODE */}
           <form onSubmit={manejarSubmit} className="space-y-3 xs:space-y-4">
             {esRegistro && (
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 xs:w-5 xs:h-5" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4 xs:w-5 xs:h-5" />
                 <input
                   type="text"
                   name="nombreCompleto"
                   placeholder="Nombre completo"
                   value={formData.nombreCompleto}
                   onChange={manejarCambio}
-                  className="w-full pl-9 xs:pl-10 pr-3 xs:pr-4 py-2.5 xs:py-3 text-sm xs:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                  className="w-full pl-9 xs:pl-10 pr-3 xs:pr-4 py-2.5 xs:py-3 text-sm xs:text-base border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                 />
                 {errores.nombreCompleto && (
-                  <p className="text-red-500 text-xs mt-1 font-medium">
+                  <p className="text-red-500 dark:text-red-400 text-xs mt-1 font-medium">
                     {errores.nombreCompleto}
                   </p>
                 )}
@@ -185,36 +185,36 @@ export function Login() {
             )}
 
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 xs:w-5 xs:h-5" />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4 xs:w-5 xs:h-5" />
               <input
                 type="email"
                 name="email"
                 placeholder="Correo electrónico"
                 value={formData.email}
                 onChange={manejarCambio}
-                className="w-full pl-9 xs:pl-10 pr-3 xs:pr-4 py-2.5 xs:py-3 text-sm xs:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                className="w-full pl-9 xs:pl-10 pr-3 xs:pr-4 py-2.5 xs:py-3 text-sm xs:text-base border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               />
               {errores.email && (
-                <p className="text-red-500 text-xs mt-1 font-medium">
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1 font-medium">
                   {errores.email}
                 </p>
               )}
             </div>
 
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 xs:w-5 xs:h-5" />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4 xs:w-5 xs:h-5" />
               <input
                 type={mostrarPassword ? "text" : "password"}
                 name="password"
                 placeholder="Contraseña"
                 value={formData.password}
                 onChange={manejarCambio}
-                className="w-full pl-9 xs:pl-10 pr-10 xs:pr-12 py-2.5 xs:py-3 text-sm xs:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                className="w-full pl-9 xs:pl-10 pr-10 xs:pr-12 py-2.5 xs:py-3 text-sm xs:text-base border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               />
               <button
                 type="button"
                 onClick={() => setMostrarPassword(!mostrarPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 {mostrarPassword ? (
                   <EyeOff className="w-4 h-4 xs:w-5 xs:h-5" />
@@ -223,7 +223,7 @@ export function Login() {
                 )}
               </button>
               {errores.password && (
-                <p className="text-red-500 text-xs mt-1 font-medium">
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1 font-medium">
                   {errores.password}
                 </p>
               )}
@@ -232,7 +232,7 @@ export function Login() {
             <button
               type="submit"
               disabled={cargando}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 xs:py-3 px-4 xs:px-6 text-sm xs:text-base rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white font-semibold py-2.5 xs:py-3 px-4 xs:px-6 text-sm xs:text-base rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cargando
                 ? "Procesando..."
@@ -247,7 +247,7 @@ export function Login() {
                 <button
                   type="button"
                   onClick={() => setMostrarRecuperar(true)}
-                  className="text-xs xs:text-sm text-gray-700 hover:text-blue-600 transition-colors font-medium"
+                  className="text-xs xs:text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
                 >
                   ¿Olvidaste tu contraseña?
                 </button>
@@ -255,23 +255,23 @@ export function Login() {
             )}
           </form>
 
-          {/* Divisor */}
+          {/* Divisor CON DARK MODE */}
           <div className="relative my-4 xs:my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
             </div>
             <div className="relative flex justify-center text-xs xs:text-sm">
-              <span className="px-3 xs:px-4 bg-white text-gray-600 font-medium">
+              <span className="px-3 xs:px-4 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium">
                 O continúa con
               </span>
             </div>
           </div>
 
-          {/* Botón Google */}
+          {/* Botón Google CON DARK MODE */}
           <button
             onClick={manejarGoogleLogin}
             disabled={cargando}
-            className="w-full bg-white hover:bg-gray-50 text-gray-700 font-semibold py-2.5 xs:py-3 px-4 xs:px-6 text-sm xs:text-base rounded-xl border-2 border-gray-200 transition-all duration-200 transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 xs:gap-3"
+            className="w-full bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold py-2.5 xs:py-3 px-4 xs:px-6 text-sm xs:text-base rounded-xl border-2 border-gray-200 dark:border-gray-600 transition-all duration-200 transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 xs:gap-3"
           >
             <svg className="w-4 h-4 xs:w-5 xs:h-5" viewBox="0 0 24 24">
               <path
@@ -304,7 +304,7 @@ export function Login() {
                 setErrores({});
                 setMensaje({ tipo: "", texto: "" });
               }}
-              className="text-xs xs:text-sm sm:text-base text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+              className="text-xs xs:text-sm sm:text-base text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-colors"
             >
               {esRegistro
                 ? "¿Ya tienes cuenta? Inicia sesión"
@@ -313,8 +313,8 @@ export function Login() {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="text-center mt-4 xs:mt-6 text-xs xs:text-sm text-white drop-shadow-lg px-2">
+        {/* Footer CON DARK MODE */}
+        <div className="text-center mt-4 xs:mt-6 text-xs xs:text-sm text-white dark:text-gray-300 drop-shadow-lg px-2">
           <p className="font-semibold">
             Sistema Contable Profesional para Paraguay
           </p>

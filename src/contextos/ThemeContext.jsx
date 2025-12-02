@@ -4,16 +4,17 @@ const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
-    // Cargar preferencia guardada o usar preferencia del sistema
+    // Cargar preferencia guardada, si no existe usar DARK por defecto
     const savedTheme = localStorage.getItem('contaapi-theme')
     if (savedTheme) {
       return savedTheme === 'dark'
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
+    // ✅ DARK MODE POR DEFECTO (cambié de false a true)
+    return true
   })
 
   useEffect(() => {
-    // Aplicar clase al HTML
+    // Aplicar clase al HTML y guardar en localStorage
     if (isDark) {
       document.documentElement.classList.add('dark')
       localStorage.setItem('contaapi-theme', 'dark')
