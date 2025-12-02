@@ -20,20 +20,16 @@ import {
 } from 'lucide-react'
 import { servicioAutenticacion } from '../../servicios/autenticacion'
 import { useAutenticacion } from '../../hooks/useAutenticacion'
+import { useEmpresa } from '../../contextos/EmpresaContext'
 
 export function LayoutPrincipal({ children }) {
   const { usuario } = useAutenticacion()
+  const { empresaActual, periodoActual, limpiarContexto } = useEmpresa()
   const location = useLocation()
   const navigate = useNavigate()
   
   const [menuAbierto, setMenuAbierto] = useState(true)
-  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null)
   const [mostrarSelectorEmpresa, setMostrarSelectorEmpresa] = useState(false)
-
-  // Datos de ejemplo de empresas (luego vendrán de Supabase)
-  const empresas = [
-    { id: '87a70676-4dc4-4e53-9f89-4df5cdd09302', nombre: 'Mi Empresa Demo', ruc: '80012345-6' },
-  ]
 
   const menuItems = [
     {
@@ -41,7 +37,7 @@ export function LayoutPrincipal({ children }) {
       items: [
         { nombre: 'Dashboard', icono: LayoutDashboard, ruta: '/dashboard' },
         { nombre: 'Empresas', icono: Building2, ruta: '/empresas' },
-        { nombre: 'Equipo', icono: Users, ruta: '/equipo' }, // 👈 NUEVO
+        { nombre: 'Equipo', icono: Users, ruta: '/equipo' },
       ]
     },
     {
@@ -79,12 +75,28 @@ export function LayoutPrincipal({ children }) {
     navigate('/login')
   }
 
+  const cambiarEmpresaPeriodo = () => {
+    limpiarContexto()
+    navigate('/seleccion-periodo')
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+    <div className="min-h-screen flex relative">
+      {/* Fondo con imagen - FIJO */}
+      <div 
+        className="fixed inset-0 bg-cover bg-center -z-10"
+        style={{ 
+          backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
+          filter: 'blur(4px)'
+        }}
+      />
+      {/* Overlay oscuro - FIJO */}
+      <div className="fixed inset-0 bg-black/70 -z-10" />
+
+      {/* Sidebar con backdrop blur */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 transition-all duration-300 ${
         menuAbierto ? 'w-64' : 'w-20'
-      } bg-white border-r border-gray-200 flex flex-col`}>
+      } bg-white/95 backdrop-blur-sm border-r border-gray-200 flex flex-col shadow-xl`}>
         
         {/* Logo y toggle */}
         <div className="h-16 border-b border-gray-200 flex items-center justify-between px-4">
@@ -109,7 +121,7 @@ export function LayoutPrincipal({ children }) {
         </div>
 
         {/* Selector de empresa */}
-        {menuAbierto && (
+        {menuAbierto && empresaActual && (
           <div className="p-4 border-b border-gray-200">
             <button
               onClick={() => setMostrarSelectorEmpresa(!mostrarSelectorEmpresa)}
@@ -119,39 +131,26 @@ export function LayoutPrincipal({ children }) {
                 <Building2 className="w-5 h-5 text-blue-600" />
                 <div className="text-left">
                   <p className="text-sm font-semibold text-gray-900">
-                    {empresaSeleccionada?.nombre || 'Mi Empresa Demo'}
+                    {empresaActual.nombre}
                   </p>
-                  {empresaSeleccionada && (
-                    <p className="text-xs text-gray-500">{empresaSeleccionada.ruc}</p>
+                  {periodoActual && (
+                    <p className="text-xs text-gray-500">Periodo: {periodoActual.anio}</p>
                   )}
                 </div>
               </div>
               <ChevronDown className="w-4 h-4 text-gray-500" />
             </button>
 
-            {/* Dropdown de empresas */}
+            {/* Dropdown */}
             {mostrarSelectorEmpresa && (
               <div className="mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-                {empresas.map((empresa) => (
-                  <button
-                    key={empresa.id}
-                    onClick={() => {
-                      setEmpresaSeleccionada(empresa)
-                      setMostrarSelectorEmpresa(false)
-                    }}
-                    className="w-full text-left p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
-                  >
-                    <p className="text-sm font-medium text-gray-900">{empresa.nombre}</p>
-                    <p className="text-xs text-gray-500">{empresa.ruc}</p>
-                  </button>
-                ))}
-                <Link
-                  to="/empresas/nueva"
+                <button
+                  onClick={cambiarEmpresaPeriodo}
                   className="w-full text-left p-3 hover:bg-blue-50 transition-colors text-blue-600 font-medium text-sm flex items-center gap-2"
                 >
                   <Building2 className="w-4 h-4" />
-                  Nueva empresa
-                </Link>
+                  Cambiar empresa/periodo
+                </button>
               </div>
             )}
           </div>
@@ -209,14 +208,14 @@ export function LayoutPrincipal({ children }) {
 
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+        {/* Header con backdrop blur */}
+        <header className="h-16 bg-white/95 backdrop-blur-sm border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
           <div className="flex items-center gap-4 flex-1 max-w-2xl">
             <Search className="w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar asientos, facturas, proveedores..."
-              className="flex-1 outline-none text-sm text-gray-700"
+              className="flex-1 outline-none text-sm text-gray-700 bg-transparent"
             />
           </div>
 
