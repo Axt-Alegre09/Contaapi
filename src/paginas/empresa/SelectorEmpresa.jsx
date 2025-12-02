@@ -1,16 +1,18 @@
 // src/paginas/empresa/SelectorEmpresa.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useEmpresa } from '@/contextos/EmpresaContext'  // ← CORREGIDO: era useEmpresaContext
+import { useEmpresa } from '@/contextos/EmpresaContext'
 import { supabase } from '@/configuracion/supabase'
 
 export function SelectorEmpresa() {
   const [empresas, setEmpresas] = useState([])
+  const [empresasFiltradas, setEmpresasFiltradas] = useState([])
+  const [busqueda, setBusqueda] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const { establecerContexto } = useEmpresa()  // ← CORREGIDO
+  const { establecerContexto } = useEmpresa()
   
   const periodoSeleccionado = location.state?.periodo
 
@@ -22,6 +24,20 @@ export function SelectorEmpresa() {
     cargarEmpresas()
   }, [periodoSeleccionado])
 
+  useEffect(() => {
+    // Filtrar empresas cuando cambia la búsqueda
+    if (busqueda.trim() === '') {
+      setEmpresasFiltradas(empresas)
+    } else {
+      const filtradas = empresas.filter(empresa =>
+        empresa.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+        empresa.ruc.includes(busqueda) ||
+        empresa.rol.toLowerCase().includes(busqueda.toLowerCase())
+      )
+      setEmpresasFiltradas(filtradas)
+    }
+  }, [busqueda, empresas])
+
   const cargarEmpresas = async () => {
     try {
       setLoading(true)
@@ -30,7 +46,6 @@ export function SelectorEmpresa() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No hay usuario autenticado')
 
-      // Obtener empresas del usuario para el periodo seleccionado
       const { data, error } = await supabase
         .from('usuarios_empresas')
         .select(`
@@ -51,7 +66,6 @@ export function SelectorEmpresa() {
 
       if (error) throw error
 
-      // Transformar datos
       const empresasFormateadas = data
         .filter(item => item.empresas && item.empresas.estado === 'activa')
         .map(item => ({
@@ -65,6 +79,7 @@ export function SelectorEmpresa() {
         }))
 
       setEmpresas(empresasFormateadas)
+      setEmpresasFiltradas(empresasFormateadas)
     } catch (error) {
       console.error('Error cargando empresas:', error)
       setError('Error al cargar las empresas del periodo seleccionado')
@@ -74,7 +89,6 @@ export function SelectorEmpresa() {
   }
 
   const seleccionarEmpresa = (empresa) => {
-    // Establecer contexto completo
     establecerContexto(
       {
         id: empresa.id,
@@ -92,14 +106,22 @@ export function SelectorEmpresa() {
       empresa.rol
     )
     
-    // Redirigir al dashboard
     navigate('/dashboard')
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg">
+      <div className="min-h-screen flex items-center justify-center relative">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
+            filter: 'blur(3px)'
+          }}
+        />
+        <div className="absolute inset-0 bg-black/60" />
+        
+        <div className="relative z-10 bg-white p-8 rounded-lg shadow-lg">
           <div className="flex items-center gap-3">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span className="text-gray-700">Cargando empresas...</span>
@@ -111,8 +133,17 @@ export function SelectorEmpresa() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md">
+      <div className="min-h-screen flex items-center justify-center relative">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
+            filter: 'blur(3px)'
+          }}
+        />
+        <div className="absolute inset-0 bg-black/60" />
+        
+        <div className="relative z-10 bg-white p-8 rounded-lg shadow-lg max-w-md">
           <div className="text-center">
             <div className="text-red-600 text-5xl mb-4">⚠️</div>
             <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
@@ -130,8 +161,17 @@ export function SelectorEmpresa() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
+          filter: 'blur(3px)'
+        }}
+      />
+      <div className="absolute inset-0 bg-black/60" />
+      
+      <div className="relative z-10 bg-white p-8 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="mb-6">
           <button
             onClick={() => navigate('/seleccion-periodo')}
@@ -155,20 +195,65 @@ export function SelectorEmpresa() {
             </div>
           </div>
         </div>
-        
-        <div className="space-y-3">
-          {empresas.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">No tienes empresas asignadas en este periodo</p>
-              <button
-                onClick={() => navigate('/seleccion-periodo')}
-                className="text-blue-600 hover:underline"
+
+        {/* Buscador */}
+        {empresas.length > 0 && (
+          <div className="mb-4">
+            <div className="relative">
+              <svg 
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
               >
-                Seleccionar otro periodo
-              </button>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Buscar empresa por nombre, RUC o rol..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+              />
+              {busqueda && (
+                <button
+                  onClick={() => setBusqueda('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {busqueda && (
+              <p className="text-sm text-gray-600 mt-2">
+                {empresasFiltradas.length} {empresasFiltradas.length === 1 ? 'empresa encontrada' : 'empresas encontradas'}
+              </p>
+            )}
+          </div>
+        )}
+        
+        {/* Lista de empresas con scroll */}
+        <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+          {empresasFiltradas.length === 0 ? (
+            <div className="text-center py-8">
+              {empresas.length === 0 ? (
+                <>
+                  <p className="text-gray-500 mb-4">No tienes empresas asignadas en este periodo</p>
+                  <button
+                    onClick={() => navigate('/seleccion-periodo')}
+                    className="text-blue-600 hover:underline"
+                  >
+                    Seleccionar otro periodo
+                  </button>
+                </>
+              ) : (
+                <p className="text-gray-500">No se encontraron empresas con "{busqueda}"</p>
+              )}
             </div>
           ) : (
-            empresas.map((empresa) => (
+            empresasFiltradas.map((empresa) => (
               <button
                 key={empresa.id}
                 onClick={() => seleccionarEmpresa(empresa)}

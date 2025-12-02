@@ -51,8 +51,20 @@ export function SeleccionPeriodo() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg">
+      <div className="min-h-screen flex items-center justify-center relative">
+        {/* Fondo con imagen */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
+            filter: 'blur(3px)'
+          }}
+        />
+        {/* Overlay oscuro */}
+        <div className="absolute inset-0 bg-black/60" />
+        
+        {/* Contenido */}
+        <div className="relative z-10 bg-white p-8 rounded-lg shadow-lg">
           <div className="flex items-center gap-3">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span className="text-gray-700">Cargando periodos...</span>
@@ -64,8 +76,20 @@ export function SeleccionPeriodo() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md">
+      <div className="min-h-screen flex items-center justify-center relative">
+        {/* Fondo con imagen */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
+            filter: 'blur(3px)'
+          }}
+        />
+        {/* Overlay oscuro */}
+        <div className="absolute inset-0 bg-black/60" />
+        
+        {/* Contenido */}
+        <div className="relative z-10 bg-white p-8 rounded-lg shadow-lg max-w-md">
           <div className="text-center">
             <div className="text-red-600 text-5xl mb-4">⚠️</div>
             <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
@@ -83,8 +107,20 @@ export function SeleccionPeriodo() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      {/* Fondo con imagen */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
+          filter: 'blur(3px)'
+        }}
+      />
+      {/* Overlay oscuro */}
+      <div className="absolute inset-0 bg-black/60" />
+      
+      {/* Contenido */}
+      <div className="relative z-10 bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
         
         {/* Botón cerrar sesión */}
         <button
