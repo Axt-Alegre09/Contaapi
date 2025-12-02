@@ -82,16 +82,10 @@ export function LayoutPrincipal({ children }) {
 
   return (
     <div className="min-h-screen flex relative">
-      {/* Fondo con imagen - FIJO */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center -z-10"
-        style={{ 
-          backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
-          filter: 'blur(4px)'
-        }}
-      />
-      {/* Overlay oscuro - FIJO */}
-      <div className="fixed inset-0 bg-black/70 -z-10" />
+      {/* ========================================= */}
+      {/* FONDO NUEVO - GRADIENTE SUTIL (OPCIÓN 1) */}
+      {/* ========================================= */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-slate-50 to-gray-100 -z-10" />
 
       {/* Sidebar con backdrop blur */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 transition-all duration-300 ${
