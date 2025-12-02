@@ -1,21 +1,95 @@
-import { Moon, Sun } from 'lucide-react' // ← AGREGAR ESTOS ICONOS
-import { useTheme } from '../../contextos/ThemeContext' // ← AGREGAR ESTE IMPORT
+import { useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { 
+  LayoutDashboard, 
+  Building2, 
+  FileText, 
+  ShoppingCart, 
+  ShoppingBag,
+  Landmark,
+  Package,
+  Users,
+  Settings,
+  LogOut,
+  ChevronDown,
+  Menu,
+  X,
+  Search,
+  Bell,
+  HelpCircle,
+  Moon,
+  Sun
+} from 'lucide-react'
+import { servicioAutenticacion } from '../../servicios/autenticacion'
+import { useAutenticacion } from '../../hooks/useAutenticacion'
+import { useEmpresa } from '../../contextos/EmpresaContext'
+import { useTheme } from '../../contextos/ThemeContext'
 
 export function LayoutPrincipal({ children }) {
   const { usuario } = useAutenticacion()
   const { empresaActual, periodoActual, limpiarContexto } = useEmpresa()
-  const { isDark, toggleTheme } = useTheme() // ← AGREGAR ESTO
+  const { isDark, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
   
-  // ... resto del código igual ...
+  const [menuAbierto, setMenuAbierto] = useState(true)
+  const [mostrarSelectorEmpresa, setMostrarSelectorEmpresa] = useState(false)
+
+  const menuItems = [
+    {
+      titulo: 'Principal',
+      items: [
+        { nombre: 'Dashboard', icono: LayoutDashboard, ruta: '/dashboard' },
+        { nombre: 'Empresas', icono: Building2, ruta: '/empresas' },
+        { nombre: 'Equipo', icono: Users, ruta: '/equipo' },
+      ]
+    },
+    {
+      titulo: 'Contabilidad',
+      items: [
+        { nombre: 'Plan de Cuentas', icono: FileText, ruta: '/plan-cuentas' },
+        { nombre: 'Asientos Contables', icono: FileText, ruta: '/asientos' },
+        { nombre: 'Libro Diario', icono: FileText, ruta: '/libro-diario' },
+        { nombre: 'Libro Mayor', icono: FileText, ruta: '/libro-mayor' },
+        { nombre: 'Balances', icono: FileText, ruta: '/balances' },
+      ]
+    },
+    {
+      titulo: 'Operaciones Fiscales',
+      items: [
+        { nombre: 'Compras', icono: ShoppingCart, ruta: '/compras' },
+        { nombre: 'Ventas', icono: ShoppingBag, ruta: '/ventas' },
+        { nombre: 'Libro IVA', icono: FileText, ruta: '/libro-iva' },
+      ]
+    },
+    {
+      titulo: 'Módulos',
+      items: [
+        { nombre: 'Bancos', icono: Landmark, ruta: '/bancos' },
+        { nombre: 'Bienes de Uso', icono: Package, ruta: '/bienes-uso' },
+        { nombre: 'Proveedores', icono: Users, ruta: '/proveedores' },
+      ]
+    }
+  ]
+
+  const estaActivo = (ruta) => location.pathname === ruta
+
+  const cerrarSesion = async () => {
+    await servicioAutenticacion.cerrarSesion()
+    navigate('/login')
+  }
+
+  const cambiarEmpresaPeriodo = () => {
+    limpiarContexto()
+    navigate('/seleccion-periodo')
+  }
 
   return (
     <div className="min-h-screen flex relative">
-      {/* FONDO con dark mode */}
+      {/* Fondo con dark mode */}
       <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-slate-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 -z-10" />
 
-      {/* Sidebar con dark mode */}
+      {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 transition-all duration-300 ${
         menuAbierto ? 'w-64' : 'w-20'
       } bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-xl`}>
@@ -42,9 +116,42 @@ export function LayoutPrincipal({ children }) {
           </button>
         </div>
 
-        {/* ... selector de empresa igual pero con dark: ... */}
+        {/* Selector de empresa */}
+        {menuAbierto && empresaActual && (
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setMostrarSelectorEmpresa(!mostrarSelectorEmpresa)}
+              className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-800/30 dark:hover:to-purple-800/30 rounded-xl transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {empresaActual.nombre}
+                  </p>
+                  {periodoActual && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Periodo: {periodoActual.anio}</p>
+                  )}
+                </div>
+              </div>
+              <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            </button>
 
-        {/* Menú de navegación con dark mode */}
+            {mostrarSelectorEmpresa && (
+              <div className="mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
+                <button
+                  onClick={cambiarEmpresaPeriodo}
+                  className="w-full text-left p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-blue-600 dark:text-blue-400 font-medium text-sm flex items-center gap-2"
+                >
+                  <Building2 className="w-4 h-4" />
+                  Cambiar empresa/periodo
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Menú de navegación */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-6">
           {menuItems.map((seccion, idx) => (
             <div key={idx}>
@@ -75,9 +182,9 @@ export function LayoutPrincipal({ children }) {
           ))}
         </nav>
 
-        {/* Footer del sidebar con dark mode */}
+        {/* Footer del sidebar */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-2">
-          {/* TOGGLE DARK MODE */}
+          {/* Toggle Dark Mode */}
           <button
             onClick={toggleTheme}
             className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -102,6 +209,7 @@ export function LayoutPrincipal({ children }) {
             <Settings className={`w-5 h-5 ${!menuAbierto && 'mx-auto'}`} />
             {menuAbierto && <span className="text-sm font-medium">Configuración</span>}
           </Link>
+          
           <button
             onClick={cerrarSesion}
             className="w-full flex items-center gap-3 px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -114,7 +222,7 @@ export function LayoutPrincipal({ children }) {
 
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header con dark mode */}
+        {/* Header */}
         <header className="h-16 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 shadow-sm">
           <div className="flex items-center gap-4 flex-1 max-w-2xl">
             <Search className="w-5 h-5 text-gray-400 dark:text-gray-500" />
