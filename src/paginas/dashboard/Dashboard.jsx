@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 
 export function Dashboard() {
-  // Datos de ejemplo (luego vendrán de Supabase)
   const estadisticas = [
     {
       titulo: 'Ventas del Mes',
@@ -96,139 +95,153 @@ export function Dashboard() {
   ]
 
   return (
-    <div className="space-y-6">
-      {/* Encabezado */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Bienvenido de vuelta, aquí está tu resumen</p>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Calendar className="w-4 h-4" />
-          <span>Período: Enero 2024 - Diciembre 2024</span>
-        </div>
-      </div>
-
-      {/* Estadísticas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {estadisticas.map((stat, idx) => (
-          <div key={idx} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-lg bg-${stat.color}-50`}>
-                <stat.icono className={`w-6 h-6 text-${stat.color}-600`} />
-              </div>
-              <div className={`flex items-center gap-1 text-sm font-medium ${
-                stat.tipo === 'incremento' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {stat.tipo === 'incremento' ? (
-                  <TrendingUp className="w-4 h-4" />
-                ) : (
-                  <TrendingDown className="w-4 h-4" />
-                )}
-                {stat.cambio}
-              </div>
-            </div>
-            <h3 className="text-sm text-gray-600 mb-1">{stat.titulo}</h3>
-            <p className="text-2xl font-bold text-gray-900">{stat.valor}</p>
+    <div className="min-h-screen relative">
+      {/* Fondo con imagen */}
+      <div 
+        className="fixed inset-0 bg-cover bg-center -z-10"
+        style={{ 
+          backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
+          filter: 'blur(4px)'
+        }}
+      />
+      {/* Overlay más oscuro que login */}
+      <div className="fixed inset-0 bg-black/70 -z-10" />
+      
+      {/* Contenido con padding */}
+      <div className="relative space-y-6 p-6">
+        {/* Encabezado */}
+        <div className="flex items-center justify-between bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-1">Bienvenido de vuelta, aquí está tu resumen</p>
           </div>
-        ))}
-      </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Calendar className="w-4 h-4" />
+            <span>Período: Enero 2024 - Diciembre 2024</span>
+          </div>
+        </div>
 
-      {/* Acciones rápidas */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {accionesRapidas.map((accion, idx) => (
-            <Link
-              key={idx}
-              to={accion.ruta}
-              className="group bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all hover:scale-105"
-            >
-              <div className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${accion.color} mb-4`}>
-                <accion.icono className="w-6 h-6 text-white" />
+        {/* Estadísticas principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {estadisticas.map((stat, idx) => (
+            <div key={idx} className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-lg bg-${stat.color}-50`}>
+                  <stat.icono className={`w-6 h-6 text-${stat.color}-600`} />
+                </div>
+                <div className={`flex items-center gap-1 text-sm font-medium ${
+                  stat.tipo === 'incremento' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {stat.tipo === 'incremento' ? (
+                    <TrendingUp className="w-4 h-4" />
+                  ) : (
+                    <TrendingDown className="w-4 h-4" />
+                  )}
+                  {stat.cambio}
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">{accion.titulo}</h3>
-              <p className="text-sm text-gray-600">{accion.descripcion}</p>
-              <div className="flex items-center gap-2 mt-4 text-blue-600 font-medium text-sm group-hover:gap-3 transition-all">
-                <span>Ir</span>
-                <ArrowRight className="w-4 h-4" />
-              </div>
-            </Link>
+              <h3 className="text-sm text-gray-600 mb-1">{stat.titulo}</h3>
+              <p className="text-2xl font-bold text-gray-900">{stat.valor}</p>
+            </div>
           ))}
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Actividad reciente */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Actividad Reciente</h2>
-            <Link to="/actividad" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-              Ver todo
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {actividadReciente.map((actividad, idx) => (
-              <div key={idx} className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className={`p-2 rounded-lg ${
-                  actividad.tipo === 'asiento' ? 'bg-blue-100' :
-                  actividad.tipo === 'venta' ? 'bg-green-100' : 'bg-purple-100'
-                }`}>
-                  {actividad.tipo === 'asiento' && <FileText className="w-5 h-5 text-blue-600" />}
-                  {actividad.tipo === 'venta' && <ShoppingBag className="w-5 h-5 text-green-600" />}
-                  {actividad.tipo === 'compra' && <ShoppingCart className="w-5 h-5 text-purple-600" />}
+        {/* Acciones rápidas */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {accionesRapidas.map((accion, idx) => (
+              <Link
+                key={idx}
+                to={accion.ruta}
+                className="group bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all hover:scale-105"
+              >
+                <div className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${accion.color} mb-4`}>
+                  <accion.icono className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {actividad.descripcion}
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                      {actividad.monto}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-xs text-gray-500">{actividad.numero}</p>
-                    <span className="text-xs text-gray-400">•</span>
-                    <p className="text-xs text-gray-500">{actividad.fecha}</p>
-                  </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">{accion.titulo}</h3>
+                <p className="text-sm text-gray-600">{accion.descripcion}</p>
+                <div className="flex items-center gap-2 mt-4 text-blue-600 font-medium text-sm group-hover:gap-3 transition-all">
+                  <span>Ir</span>
+                  <ArrowRight className="w-4 h-4" />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
 
-        {/* Tareas pendientes */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Tareas Pendientes</h2>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Plus className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
-          <div className="space-y-3">
-            {tareasPendientes.map((tarea, idx) => (
-              <div key={idx} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{tarea.titulo}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                      tarea.urgencia === 'alta' ? 'bg-red-100 text-red-700' :
-                      tarea.urgencia === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {tarea.urgencia === 'alta' && <AlertCircle className="w-3 h-3" />}
-                      {tarea.urgencia.charAt(0).toUpperCase() + tarea.urgencia.slice(1)}
-                    </span>
-                    <span className="text-xs text-gray-500">{tarea.fecha}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Actividad reciente */}
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Actividad Reciente</h2>
+              <Link to="/actividad" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Ver todo
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {actividadReciente.map((actividad, idx) => (
+                <div key={idx} className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
+                  <div className={`p-2 rounded-lg ${
+                    actividad.tipo === 'asiento' ? 'bg-blue-100' :
+                    actividad.tipo === 'venta' ? 'bg-green-100' : 'bg-purple-100'
+                  }`}>
+                    {actividad.tipo === 'asiento' && <FileText className="w-5 h-5 text-blue-600" />}
+                    {actividad.tipo === 'venta' && <ShoppingBag className="w-5 h-5 text-green-600" />}
+                    {actividad.tipo === 'compra' && <ShoppingCart className="w-5 h-5 text-purple-600" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {actividad.descripcion}
+                      </p>
+                      <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                        {actividad.monto}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-gray-500">{actividad.numero}</p>
+                      <span className="text-xs text-gray-400">•</span>
+                      <p className="text-xs text-gray-500">{actividad.fecha}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Tareas pendientes */}
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Tareas Pendientes</h2>
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <Plus className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              {tareasPendientes.map((tarea, idx) => (
+                <div key={idx} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer bg-white">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{tarea.titulo}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                        tarea.urgencia === 'alta' ? 'bg-red-100 text-red-700' :
+                        tarea.urgencia === 'media' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {tarea.urgencia === 'alta' && <AlertCircle className="w-3 h-3" />}
+                        {tarea.urgencia.charAt(0).toUpperCase() + tarea.urgencia.slice(1)}
+                      </span>
+                      <span className="text-xs text-gray-500">{tarea.fecha}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
