@@ -1,12 +1,11 @@
 // src/componentes/RequiereContexto.jsx
 import { Navigate } from 'react-router-dom'
-import { useEmpresaContext } from '@/contextos/EmpresaContext'
+import { useEmpresa } from '@/contextos/EmpresaContext'
 
-export default function RequiereContexto({ children }) {
-  const { tieneContexto } = useEmpresaContext()
+export function RequiereContexto({ children }) {
+  const { tieneContextoCompleto } = useEmpresa()
 
-  if (!tieneContexto) {
-    // Si no hay contexto, redirigir a selección de periodo
+  if (!tieneContextoCompleto) {
     return <Navigate to="/seleccion-periodo" replace />
   }
 

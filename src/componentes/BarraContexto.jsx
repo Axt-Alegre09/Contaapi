@@ -1,15 +1,15 @@
 // src/componentes/BarraContexto.jsx
 import { useNavigate } from 'react-router-dom'
-import { useEmpresaContext } from '@/contextos/EmpresaContext'
+import { useEmpresa } from '@/contextos/EmpresaContext'
 
-export default function BarraContexto() {
-  const { contextoActivo, cambiarEmpresa } = useEmpresaContext()
+export function BarraContexto() {
+  const { empresaActual, periodoActual, limpiarContexto } = useEmpresa()
   const navigate = useNavigate()
 
-  if (!contextoActivo) return null
+  if (!empresaActual || !periodoActual) return null
 
   const handleCambiarEmpresa = () => {
-    cambiarEmpresa()
+    limpiarContexto()
     navigate('/seleccion-periodo')
   }
 
@@ -22,8 +22,8 @@ export default function BarraContexto() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <span className="text-gray-600">Empresa:</span>
-            <span className="font-semibold text-gray-800">{contextoActivo.empresaNombre}</span>
-            <span className="text-gray-500">({contextoActivo.empresaRuc})</span>
+            <span className="font-semibold text-gray-800">{empresaActual.nombre}</span>
+            <span className="text-gray-500">({empresaActual.ruc})</span>
           </div>
           
           <div className="h-4 w-px bg-gray-300" />
@@ -33,7 +33,7 @@ export default function BarraContexto() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <span className="text-gray-600">Periodo:</span>
-            <span className="font-semibold text-gray-800">{contextoActivo.periodoAnio}</span>
+            <span className="font-semibold text-gray-800">{periodoActual.anio}</span>
           </div>
         </div>
 

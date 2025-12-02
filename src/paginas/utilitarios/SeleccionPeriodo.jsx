@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/configuracion/supabase'
 
-export default function SeleccionPeriodo() {
+export function SeleccionPeriodo() {
   const [periodos, setPeriodos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -18,7 +18,6 @@ export default function SeleccionPeriodo() {
       setLoading(true)
       setError(null)
 
-      // Obtener periodos disponibles desde la tabla periodos_fiscales
       const { data, error } = await supabase
         .from('periodos_fiscales')
         .select('*')
@@ -37,14 +36,7 @@ export default function SeleccionPeriodo() {
 
   const seleccionarPeriodo = (periodo) => {
     navigate('/seleccion-empresa', { 
-      state: { 
-        periodo: {
-          id: periodo.id,
-          anio: periodo.anio,
-          fechaDesde: periodo.fecha_desde,
-          fechaHasta: periodo.fecha_hasta
-        }
-      } 
+      state: { periodo }
     })
   }
 
@@ -85,6 +77,11 @@ export default function SeleccionPeriodo() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <div className="text-center mb-6">
+          <img 
+            src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo.jpg" 
+            alt="ContaAPI Logo" 
+            className="w-16 h-16 mx-auto mb-4 rounded-xl shadow-lg object-contain"
+          />
           <h1 className="text-3xl font-bold text-gray-800 mb-2">ContaAPI</h1>
           <h2 className="text-xl font-semibold text-gray-700">Selección de Periodo</h2>
           <p className="text-gray-500 text-sm mt-2">
@@ -125,15 +122,6 @@ export default function SeleccionPeriodo() {
               </button>
             ))
           )}
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="w-full text-center text-gray-600 hover:text-gray-800 text-sm"
-          >
-            ← Volver al inicio
-          </button>
         </div>
       </div>
     </div>
