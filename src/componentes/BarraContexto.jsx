@@ -1,9 +1,9 @@
 // src/componentes/BarraContexto.jsx
 import { useNavigate } from 'react-router-dom'
-import { useEmpresa } from '@/contextos/EmpresaContext'
+import { useEmpresa } from '@/contextos/EmpresaContext'  // ← CORREGIDO
 
 export function BarraContexto() {
-  const { empresaActual, periodoActual, limpiarContexto } = useEmpresa()
+  const { empresaActual, periodoActual, limpiarContexto } = useEmpresa()  // ← CORREGIDO
   const navigate = useNavigate()
 
   if (!empresaActual || !periodoActual) return null

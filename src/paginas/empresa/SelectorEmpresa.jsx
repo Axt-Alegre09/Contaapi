@@ -1,16 +1,16 @@
 // src/paginas/empresa/SelectorEmpresa.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useEmpresaContext } from '@/contextos/EmpresaContext'
+import { useEmpresa } from '@/contextos/EmpresaContext'  // ← CORREGIDO: era useEmpresaContext
 import { supabase } from '@/configuracion/supabase'
 
-export default function SelectorEmpresa() {
+export function SelectorEmpresa() {
   const [empresas, setEmpresas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const { establecerContexto } = useEmpresaContext()
+  const { establecerContexto } = useEmpresa()  // ← CORREGIDO
   
   const periodoSeleccionado = location.state?.periodo
 
@@ -27,37 +27,42 @@ export default function SelectorEmpresa() {
       setLoading(true)
       setError(null)
 
-      // Obtener el usuario actual
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No hay usuario autenticado')
 
       // Obtener empresas del usuario para el periodo seleccionado
       const { data, error } = await supabase
-        .from('miembros_empresa')
+        .from('usuarios_empresas')
         .select(`
-          empresa_id,
-          rol,
+          *,
           empresas (
             id,
-            nombre,
+            nombre_comercial,
+            razon_social,
             ruc,
-            razon_social
+            logo_url,
+            estado
           )
         `)
         .eq('user_id', user.id)
         .eq('periodo_fiscal', periodoSeleccionado.id)
         .eq('estado', 'activo')
+        .is('deleted_at', null)
 
       if (error) throw error
 
       // Transformar datos
-      const empresasFormateadas = data.map(item => ({
-        id: item.empresas.id,
-        nombre: item.empresas.nombre,
-        ruc: item.empresas.ruc,
-        razonSocial: item.empresas.razon_social,
-        rol: item.rol
-      }))
+      const empresasFormateadas = data
+        .filter(item => item.empresas && item.empresas.estado === 'activa')
+        .map(item => ({
+          id: item.empresas.id,
+          nombre: item.empresas.nombre_comercial,
+          razonSocial: item.empresas.razon_social,
+          ruc: item.empresas.ruc,
+          logoUrl: item.empresas.logo_url,
+          rol: item.rol,
+          periodoFiscal: item.periodo_fiscal
+        }))
 
       setEmpresas(empresasFormateadas)
     } catch (error) {
@@ -71,15 +76,20 @@ export default function SelectorEmpresa() {
   const seleccionarEmpresa = (empresa) => {
     // Establecer contexto completo
     establecerContexto(
-      empresa.id,
-      empresa.nombre,
-      empresa.ruc,
-      periodoSeleccionado.id,
-      periodoSeleccionado.anio,
       {
-        desde: periodoSeleccionado.fechaDesde,
-        hasta: periodoSeleccionado.fechaHasta
-      }
+        id: empresa.id,
+        nombre: empresa.nombre,
+        razonSocial: empresa.razonSocial,
+        ruc: empresa.ruc,
+        logoUrl: empresa.logoUrl
+      },
+      {
+        id: periodoSeleccionado.id,
+        anio: periodoSeleccionado.anio,
+        fechaDesde: periodoSeleccionado.fecha_desde,
+        fechaHasta: periodoSeleccionado.fecha_hasta
+      },
+      empresa.rol
     )
     
     // Redirigir al dashboard
@@ -134,6 +144,11 @@ export default function SelectorEmpresa() {
           </button>
           
           <div className="text-center">
+            <img 
+              src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo.jpg" 
+              alt="ContaAPI Logo" 
+              className="w-12 h-12 mx-auto mb-3 rounded-xl shadow-lg object-contain"
+            />
             <h2 className="text-2xl font-bold text-gray-800">Selección de Empresa</h2>
             <div className="mt-2 inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-full">
               <span className="font-semibold">Periodo: {periodoSeleccionado?.anio}</span>
