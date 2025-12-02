@@ -95,29 +95,19 @@ export function Dashboard() {
   ]
 
   return (
-    <div className="min-h-screen relative">
-      {/* Fondo con imagen */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center -z-10"
-        style={{ 
-          backgroundImage: 'url(https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/fondoLogin.jpg)',
-          filter: 'blur(4px)'
-        }}
-      />
-      {/* Overlay más oscuro que login */}
-      <div className="fixed inset-0 bg-black/70 -z-10" />
-      
-      {/* Contenido con padding */}
-      <div className="relative space-y-6 p-6">
-        {/* Encabezado */}
-        <div className="flex items-center justify-between bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Bienvenido de vuelta, aquí está tu resumen</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Calendar className="w-4 h-4" />
-            <span>Período: Enero 2024 - Diciembre 2024</span>
+    <div className="min-h-screen">
+      <div className="space-y-6">
+        {/* Encabezado con fondo blanco semi-transparente */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600 mt-1">Bienvenido de vuelta, aquí está tu resumen</p>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Calendar className="w-4 h-4" />
+              <span>Período: Enero 2024 - Diciembre 2024</span>
+            </div>
           </div>
         </div>
 
