@@ -49,25 +49,45 @@ function App() {
     <BrowserRouter>
       <EmpresaProvider>
         <Routes>
-          {/* Rutas públicas */}
+          {/* ===================== RUTAS PÚBLICAS ===================== */}
+          
+          {/* LOGIN - Si ya está autenticado, va a selección de periodo */}
+          <Route 
+            path="/login" 
+            element={usuario ? <Navigate to="/seleccion-periodo" replace /> : <Login />} 
+          />
+          
           <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
-          <Route path="/login" element={usuario ? <Navigate to="/seleccion-periodo" replace /> : <Login />} />
           
-          {/* Rutas de planes */}
-          <Route path="/planes" element={usuario ? <Planes /> : <Navigate to="/login" replace />} />
-          <Route path="/solicitar-plan" element={usuario ? <SolicitarPlan /> : <Navigate to="/login" replace />} />
+          {/* ===================== RUTAS DE SELECCIÓN ===================== */}
           
-          {/* Rutas de selección (post-login, pre-dashboard) */}
+          {/* SELECCIÓN DE PERIODO - Requiere autenticación */}
           <Route 
             path="/seleccion-periodo" 
             element={usuario ? <SeleccionPeriodo /> : <Navigate to="/login" replace />} 
           />
+          
+          {/* SELECCIÓN DE EMPRESA - Requiere autenticación */}
           <Route 
             path="/seleccion-empresa" 
             element={usuario ? <SelectorEmpresa /> : <Navigate to="/login" replace />} 
           />
           
-          {/* Rutas protegidas - requieren contexto completo */}
+          {/* ===================== PLANES ===================== */}
+          
+          <Route 
+            path="/planes" 
+            element={usuario ? <Planes /> : <Navigate to="/login" replace />} 
+          />
+          
+          <Route 
+            path="/solicitar-plan" 
+            element={usuario ? <SolicitarPlan /> : <Navigate to="/login" replace />} 
+          />
+          
+          {/* ===================== RUTAS PROTEGIDAS (CON CONTEXTO) ===================== */}
+          
+          {/* DASHBOARD - Requiere autenticación + contexto empresa/periodo */}
           <Route 
             path="/dashboard" 
             element={
@@ -83,6 +103,7 @@ function App() {
             } 
           />
 
+          {/* EQUIPO */}
           <Route 
             path="/equipo" 
             element={
@@ -98,6 +119,7 @@ function App() {
             } 
           />
 
+          {/* AUDITORÍA */}
           <Route 
             path="/equipo/auditoria" 
             element={
@@ -113,6 +135,7 @@ function App() {
             } 
           />
 
+          {/* MÉTRICAS */}
           <Route 
             path="/equipo/metricas" 
             element={
@@ -128,16 +151,18 @@ function App() {
             } 
           />
 
-          {/* Ruta raíz */}
+          {/* ===================== REDIRECCIONES ===================== */}
+          
+          {/* RUTA RAÍZ "/" */}
           <Route 
             path="/" 
-            element={
-              usuario ? (
-                <Navigate to="/seleccion-periodo" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
+            element={<Navigate to="/login" replace />} 
+          />
+          
+          {/* CUALQUIER OTRA RUTA */}
+          <Route 
+            path="*" 
+            element={<Navigate to="/login" replace />} 
           />
         </Routes>
       </EmpresaProvider>
