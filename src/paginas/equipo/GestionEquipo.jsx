@@ -1,314 +1,280 @@
-import { useState } from 'react'
-import { Users, UserPlus, Crown, Shield, User, Eye, TrendingUp, Activity, Clock } from 'lucide-react'
-import { useMiembrosEmpresa } from '../../hooks/useMiembrosEmpresa'
-import { usePermisos } from '../../hooks/usePermisos'
-import { ModalInvitarUsuario } from './ModalInvitarUsuario'
-import { TarjetaMiembroMejorada } from './TarjetaMiembroMejorada'
-import { ModalEditarRol } from './ModalEditarRol'
-import { ModalConfirmarAccion } from './ModalConfirmarAccion'
-import { Link } from 'react-router-dom'
+/**
+ * Gestión de Equipo - ContaAPI v2
+ * src/paginas/equipo/GestionEquipo.jsx
+ */
 
-export function GestionEquipo({ empresaId }) {
-  const { miembros, cargando, recargar, cambiarRol, desactivar, reactivar, eliminar } = useMiembrosEmpresa(empresaId)
-  const { puedeAdministrarUsuarios } = usePermisos(empresaId)
-  
-  const [mostrarModalInvitar, setMostrarModalInvitar] = useState(false)
-  const [mostrarModalCambiarRol, setMostrarModalCambiarRol] = useState(false)
-  const [mostrarModalConfirmar, setMostrarModalConfirmar] = useState(false)
-  const [miembroSeleccionado, setMiembroSeleccionado] = useState(null)
-  const [accionPendiente, setAccionPendiente] = useState(null)
-  const [filtroEstado, setFiltroEstado] = useState('todos') // 'todos', 'activos', 'inactivos'
+import { useState, useEffect } from 'react'
+import { Users, UserPlus, Search, RefreshCw, Filter } from 'lucide-react'
+import { usuariosServicio } from '../../servicios/usuariosServicio'
+import ModalCrearUsuario from './ModalCrearUsuario'
+import ModalModificarUsuario from './ModalModificarUsuario'
+import ModalEliminarUsuario from './ModalEliminarUsuario'
+import TarjetaUsuario from './TarjetaUsuario'
 
-  const iconoPorRol = {
-    owner: Crown,
-    admin: Shield,
-    contador: User,
-    asistente: User,
-    solo_lectura: Eye
-  }
+const FILTROS_ESTADO = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'activo', label: 'Activos' },
+  { value: 'inactivo', label: 'Inactivos' },
+  { value: 'suspendido', label: 'Suspendidos' }
+]
 
-  const colorPorRol = {
-    owner: 'text-yellow-600 bg-yellow-100',
-    admin: 'text-purple-600 bg-purple-100',
-    contador: 'text-blue-600 bg-blue-100',
-    asistente: 'text-green-600 bg-green-100',
-    solo_lectura: 'text-gray-600 bg-gray-100'
-  }
+const FILTROS_ROL = [
+  { value: 'todos', label: 'Todos los roles' },
+  { value: 'propietario', label: 'Propietarios' },
+  { value: 'administrador', label: 'Administradores' },
+  { value: 'contador', label: 'Contadores' },
+  { value: 'asistente', label: 'Asistentes' },
+  { value: 'auditor', label: 'Auditores' },
+  { value: 'invitado', label: 'Invitados' }
+]
 
-  // Calcular estadísticas
-  const miembrosActivos = miembros.filter(m => m.activo).length
-  const miembrosInactivos = miembros.filter(m => !m.activo).length
-  const rolesCounts = miembros.reduce((acc, m) => {
-    if (m.activo) acc[m.rol] = (acc[m.rol] || 0) + 1
-    return acc
-  }, {})
+export default function GestionEquipo({ empresaId }) {
+  const [usuarios, setUsuarios] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [busqueda, setBusqueda] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState('activo')
+  const [filtroRol, setFiltroRol] = useState('todos')
 
-  // Filtrar miembros según filtroEstado
-  const miembrosFiltrados = miembros.filter(m => {
-    if (filtroEstado === 'activos') return m.activo
-    if (filtroEstado === 'inactivos') return !m.activo
-    return true // 'todos'
-  })
+  // Modales
+  const [modalCrear, setModalCrear] = useState(false)
+  const [modalModificar, setModalModificar] = useState(false)
+  const [modalEliminar, setModalEliminar] = useState(false)
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null)
 
-  // Handlers
-  const handleCambiarRol = (miembro) => {
-    setMiembroSeleccionado(miembro)
-    setMostrarModalCambiarRol(true)
-  }
+  useEffect(() => {
+    if (empresaId) {
+      cargarUsuarios()
+    }
+  }, [empresaId])
 
-  const handleDesactivar = (miembro) => {
-    setMiembroSeleccionado(miembro)
-    setAccionPendiente({
-      tipo: 'desactivar',
-      titulo: 'Desactivar Usuario',
-      mensaje: `¿Estás seguro que deseas desactivar a ${miembro.nombre_completo || miembro.email}?`,
-      textoBoton: 'Desactivar',
-      colorBoton: 'red'
-    })
-    setMostrarModalConfirmar(true)
-  }
-
-  const handleReactivar = (miembro) => {
-    setMiembroSeleccionado(miembro)
-    setAccionPendiente({
-      tipo: 'reactivar',
-      titulo: 'Reactivar Usuario',
-      mensaje: `¿Deseas reactivar a ${miembro.nombre_completo || miembro.email}?`,
-      textoBoton: 'Reactivar',
-      colorBoton: 'green'
-    })
-    setMostrarModalConfirmar(true)
-  }
-
-  const handleEliminar = (miembro) => {
-    setMiembroSeleccionado(miembro)
-    setAccionPendiente({
-      tipo: 'eliminar',
-      titulo: 'Eliminar Usuario',
-      mensaje: `⚠️ ATENCIÓN: Esta acción es PERMANENTE.\n\n¿Estás seguro que deseas eliminar permanentemente a ${miembro.nombre_completo || miembro.email}?\n\nEsta acción NO se puede deshacer.`,
-      textoBoton: 'Eliminar Permanentemente',
-      colorBoton: 'red'
-    })
-    setMostrarModalConfirmar(true)
-  }
-
-  const ejecutarAccion = async () => {
+  const cargarUsuarios = async () => {
+    setLoading(true)
     try {
-      switch (accionPendiente?.tipo) {
-        case 'desactivar':
-          await desactivar(miembroSeleccionado.id)
-          break
-        case 'reactivar':
-          await reactivar(miembroSeleccionado.id)
-          break
-        case 'eliminar':
-          await eliminar(miembroSeleccionado.id)
-          break
-      }
-      setMostrarModalConfirmar(false)
-      setMiembroSeleccionado(null)
-      setAccionPendiente(null)
+      const data = await usuariosServicio.obtenerUsuarios(empresaId)
+      setUsuarios(data)
     } catch (error) {
-      console.error('Error al ejecutar acción:', error)
-      alert('Error: ' + error.message)
+      console.error('Error al cargar usuarios:', error)
+      alert('Error al cargar usuarios')
+    } finally {
+      setLoading(false)
     }
   }
 
-  if (cargando) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Cargando equipo...</span>
-      </div>
-    )
+  const abrirModalModificar = (usuario) => {
+    setUsuarioSeleccionado(usuario)
+    setModalModificar(true)
   }
 
-  if (!empresaId) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-gray-600">Selecciona una empresa para ver su equipo</p>
-      </div>
-    )
+  const abrirModalEliminar = (usuario) => {
+    setUsuarioSeleccionado(usuario)
+    setModalEliminar(true)
+  }
+
+  const handleCambiarEstado = async (usuario, nuevoEstado) => {
+    if (usuario.rol === 'propietario') {
+      alert('No puedes cambiar el estado del propietario')
+      return
+    }
+
+    if (window.confirm(`¿Cambiar estado a "${nuevoEstado}"?`)) {
+      try {
+        await usuariosServicio.cambiarEstado(usuario.user_id, empresaId, nuevoEstado)
+        cargarUsuarios()
+        alert(`Estado cambiado a: ${nuevoEstado}`)
+      } catch (error) {
+        alert(error.message || 'Error al cambiar estado')
+      }
+    }
+  }
+
+  // Filtrar usuarios
+  const usuariosFiltrados = usuarios.filter(usuario => {
+    // Filtro de búsqueda
+    const coincideBusqueda = 
+      usuario.nombre_completo?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      usuario.email?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      usuario.numero_interno?.toString().includes(busqueda)
+
+    // Filtro de estado
+    const coincideEstado = filtroEstado === 'todos' || usuario.estado === filtroEstado
+
+    // Filtro de rol
+    const coincideRol = filtroRol === 'todos' || usuario.rol === filtroRol
+
+    return coincideBusqueda && coincideEstado && coincideRol
+  })
+
+  // Estadísticas
+  const stats = {
+    total: usuarios.length,
+    activos: usuarios.filter(u => u.estado === 'activo').length,
+    inactivos: usuarios.filter(u => u.estado === 'inactivo').length,
+    suspendidos: usuarios.filter(u => u.estado === 'suspendido').length
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header con estadísticas */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Equipo</h1>
-          <p className="text-gray-600 mt-1">
-            {miembros.length} {miembros.length === 1 ? 'miembro' : 'miembros'} total
-            {miembrosInactivos > 0 && (
-              <span className="text-gray-400"> ({miembrosInactivos} inactivos)</span>
-            )}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Botones de navegación */}
-          <Link
-            to={`/equipo/auditoria`}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-all"
-          >
-            <Activity className="w-5 h-5" />
-            <span className="hidden sm:inline">Auditoría</span>
-          </Link>
-          
-          <Link
-            to={`/equipo/metricas`}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-all"
-          >
-            <TrendingUp className="w-5 h-5" />
-            <span className="hidden sm:inline">Métricas</span>
-          </Link>
-
-          {puedeAdministrarUsuarios() && (
-            <button
-              onClick={() => setMostrarModalInvitar(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-xl hover:shadow-lg transition-all"
-            >
-              <UserPlus className="w-5 h-5" />
-              <span className="hidden sm:inline">Invitar Usuario</span>
-              <span className="sm:hidden">Invitar</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Estadísticas de roles */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {/* Total activos */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200">
-          <div className="inline-flex p-2 rounded-lg bg-green-100 mb-2">
-            <Users className="w-5 h-5 text-green-600" />
-          </div>
-          <p className="text-2xl font-bold text-gray-900">{miembrosActivos}</p>
-          <p className="text-sm text-gray-600">Activos</p>
-        </div>
-
-        {/* Por rol */}
-        {Object.entries(rolesCounts).map(([rol, cantidad]) => {
-          const Icono = iconoPorRol[rol]
-          return (
-            <div key={rol} className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className={`inline-flex p-2 rounded-lg ${colorPorRol[rol]} mb-2`}>
-                <Icono className="w-5 h-5" />
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-blue-600" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{cantidad}</p>
-              <p className="text-sm text-gray-600 capitalize">{rol.replace('_', ' ')}</p>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+                <p className="text-gray-600">Administra el equipo de la empresa</p>
+              </div>
             </div>
-          )
-        })}
-      </div>
 
-      {/* Filtros */}
-      <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-200">
-        <span className="text-sm font-medium text-gray-700">Mostrar:</span>
-        <button 
-          onClick={() => setFiltroEstado('todos')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            filtroEstado === 'todos' 
-              ? 'bg-blue-100 text-blue-700' 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          Todos ({miembros.length})
-        </button>
-        <button 
-          onClick={() => setFiltroEstado('activos')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            filtroEstado === 'activos' 
-              ? 'bg-green-100 text-green-700' 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          Solo Activos ({miembrosActivos})
-        </button>
-        <button 
-          onClick={() => setFiltroEstado('inactivos')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            filtroEstado === 'inactivos' 
-              ? 'bg-red-100 text-red-700' 
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          Solo Inactivos ({miembrosInactivos})
-        </button>
-      </div>
+            <div className="flex gap-3">
+              <button
+                onClick={cargarUsuarios}
+                disabled={loading}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                Actualizar
+              </button>
+              <button
+                onClick={() => setModalCrear(true)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <UserPlus className="w-5 h-5" />
+                Nuevo usuario
+              </button>
+            </div>
+          </div>
 
-      {/* Lista de miembros */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {miembrosFiltrados.map((miembro) => (
-          <TarjetaMiembroMejorada
-            key={miembro.id}
-            miembro={miembro}
-            puedeEditar={puedeAdministrarUsuarios()}
-            onCambiarRol={() => handleCambiarRol(miembro)}
-            onDesactivar={() => handleDesactivar(miembro)}
-            onReactivar={() => handleReactivar(miembro)}
-            onEliminar={() => handleEliminar(miembro)}
-          />
-        ))}
-      </div>
-
-      {miembrosFiltrados.length === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-xl">
-          <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-600">
-            {filtroEstado === 'activos' && 'No hay miembros activos'}
-            {filtroEstado === 'inactivos' && 'No hay miembros inactivos'}
-            {filtroEstado === 'todos' && 'No hay miembros en este equipo'}
-          </p>
-          {puedeAdministrarUsuarios() && filtroEstado === 'todos' && (
-            <button
-              onClick={() => setMostrarModalInvitar(true)}
-              className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Invitar al primer miembro
-            </button>
-          )}
+          {/* Estadísticas */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-sm text-gray-600">Total</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+            </div>
+            <div className="bg-green-50 rounded-lg p-4">
+              <p className="text-sm text-green-600">Activos</p>
+              <p className="text-2xl font-bold text-green-900">{stats.activos}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-sm text-gray-600">Inactivos</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.inactivos}</p>
+            </div>
+            <div className="bg-red-50 rounded-lg p-4">
+              <p className="text-sm text-red-600">Suspendidos</p>
+              <p className="text-2xl font-bold text-red-900">{stats.suspendidos}</p>
+            </div>
+          </div>
         </div>
-      )}
+
+        {/* Filtros y búsqueda */}
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <div className="grid grid-cols-3 gap-4">
+            {/* Búsqueda */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar por nombre, email o número..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Filtro de estado */}
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+              >
+                {FILTROS_ESTADO.map(filtro => (
+                  <option key={filtro.value} value={filtro.value}>
+                    {filtro.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtro de rol */}
+            <select
+              value={filtroRol}
+              onChange={(e) => setFiltroRol(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              {FILTROS_ROL.map(filtro => (
+                <option key={filtro.value} value={filtro.value}>
+                  {filtro.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Lista de usuarios */}
+        {loading ? (
+          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+            <RefreshCw className="w-12 h-12 text-gray-400 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Cargando usuarios...</p>
+          </div>
+        ) : usuariosFiltrados.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">
+              {busqueda || filtroEstado !== 'todos' || filtroRol !== 'todos'
+                ? 'No se encontraron usuarios con los filtros seleccionados'
+                : 'No hay usuarios todavía'}
+            </p>
+            {!busqueda && filtroEstado === 'todos' && filtroRol === 'todos' && (
+              <button
+                onClick={() => setModalCrear(true)}
+                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Crear primer usuario
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {usuariosFiltrados.map(usuario => (
+              <TarjetaUsuario
+                key={usuario.user_id}
+                usuario={usuario}
+                onEditar={() => abrirModalModificar(usuario)}
+                onEliminar={() => abrirModalEliminar(usuario)}
+                onCambiarEstado={(nuevoEstado) => handleCambiarEstado(usuario, nuevoEstado)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Modales */}
-      {mostrarModalInvitar && (
-        <ModalInvitarUsuario
-          empresaId={empresaId}
-          onCerrar={() => setMostrarModalInvitar(false)}
-          onInvitado={recargar}
-        />
-      )}
+      <ModalCrearUsuario
+        isOpen={modalCrear}
+        onClose={() => setModalCrear(false)}
+        empresaId={empresaId}
+        onUsuarioCreado={cargarUsuarios}
+      />
 
-      {mostrarModalCambiarRol && (
-        <ModalEditarRol
-          miembro={miembroSeleccionado}
-          onCerrar={() => {
-            setMostrarModalCambiarRol(false)
-            setMiembroSeleccionado(null)
-          }}
-          onCambiar={async (nuevoRol) => {
-            await cambiarRol(miembroSeleccionado.id, nuevoRol)
-            setMostrarModalCambiarRol(false)
-            setMiembroSeleccionado(null)
-          }}
-        />
-      )}
+      <ModalModificarUsuario
+        isOpen={modalModificar}
+        onClose={() => setModalModificar(false)}
+        usuario={usuarioSeleccionado}
+        empresaId={empresaId}
+        onUsuarioModificado={cargarUsuarios}
+      />
 
-      {mostrarModalConfirmar && (
-        <ModalConfirmarAccion
-          titulo={accionPendiente.titulo}
-          mensaje={accionPendiente.mensaje}
-          textoBoton={accionPendiente.textoBoton}
-          colorBoton={accionPendiente.colorBoton}
-          onConfirmar={ejecutarAccion}
-          onCancelar={() => {
-            setMostrarModalConfirmar(false)
-            setMiembroSeleccionado(null)
-            setAccionPendiente(null)
-          }}
-        />
-      )}
+      <ModalEliminarUsuario
+        isOpen={modalEliminar}
+        onClose={() => setModalEliminar(false)}
+        usuario={usuarioSeleccionado}
+        empresaId={empresaId}
+        onUsuarioEliminado={cargarUsuarios}
+      />
     </div>
   )
 }

@@ -3,7 +3,7 @@ import { Activity, Search, Filter, Download, Calendar, User, FileText } from 'lu
 import { Link } from 'react-router-dom'
 import { supabase } from '../../configuracion/supabase'
 
-export function PaginaAuditoria({ empresaId }) {
+export default function PaginaAuditoria({ empresaId }) {
   const [logs, setLogs] = useState([])
   const [cargando, setCargando] = useState(true)
   const [filtros, setFiltros] = useState({
@@ -24,9 +24,16 @@ export function PaginaAuditoria({ empresaId }) {
     try {
       setCargando(true)
       
+      // ACTUALIZADO: Usar la nueva tabla auditoria_logs
       let query = supabase
-        .from('vista_actividad_reciente')
-        .select('*')
+        .from('auditoria_logs')
+        .select(`
+          *,
+          user:user_id (
+            email,
+            perfiles_usuario (nombre_completo)
+          )
+        `)
         .eq('empresa_id', empresaId)
         .order('created_at', { ascending: false })
         .limit(100)
@@ -37,11 +44,11 @@ export function PaginaAuditoria({ empresaId }) {
       }
       
       if (filtros.modulo !== 'todos') {
-        query = query.eq('modulo', filtros.modulo)
+        query = query.eq('tabla', filtros.modulo)
       }
 
       if (filtros.busqueda) {
-        query = query.or(`descripcion.ilike.%${filtros.busqueda}%,accion.ilike.%${filtros.busqueda}%`)
+        query = query.or(`accion.ilike.%${filtros.busqueda}%,tabla.ilike.%${filtros.busqueda}%`)
       }
 
       if (filtros.fechaInicio) {
@@ -55,7 +62,16 @@ export function PaginaAuditoria({ empresaId }) {
       const { data, error } = await query
 
       if (error) throw error
-      setLogs(data || [])
+      
+      // Transformar datos para mostrar
+      const logsTransformados = (data || []).map(log => ({
+        ...log,
+        email: log.user?.email || 'Desconocido',
+        nombre_completo: log.user?.perfiles_usuario?.[0]?.nombre_completo || 'Usuario',
+        modulo: log.tabla || 'general'
+      }))
+      
+      setLogs(logsTransformados)
     } catch (error) {
       console.error('Error al cargar logs:', error)
     } finally {
@@ -65,13 +81,14 @@ export function PaginaAuditoria({ empresaId }) {
 
   const exportarLogs = () => {
     const csv = [
-      ['Fecha', 'Usuario', 'Módulo', 'Acción', 'Descripción'].join(','),
+      ['Fecha', 'Usuario', 'Tabla', 'Acción', 'Registro ID', 'IP'].join(','),
       ...logs.map(log => [
         new Date(log.created_at).toLocaleString('es-PY'),
         log.nombre_completo || log.email,
-        log.modulo,
+        log.tabla,
         log.accion,
-        log.descripcion
+        log.registro_id || '-',
+        log.ip_address || '-'
       ].join(','))
     ].join('\n')
 
@@ -84,21 +101,28 @@ export function PaginaAuditoria({ empresaId }) {
   }
 
   const iconoPorModulo = {
-    equipo: User,
-    contabilidad: FileText,
-    ventas: FileText,
-    compras: FileText,
-    bancos: FileText,
-    autenticacion: Activity
+    usuarios_empresas: User,
+    perfiles_usuario: User,
+    empresas: FileText,
+    periodos_contables: Calendar,
+    sucursales: FileText
   }
 
   const colorPorModulo = {
-    equipo: 'bg-purple-100 text-purple-700',
-    contabilidad: 'bg-blue-100 text-blue-700',
-    ventas: 'bg-green-100 text-green-700',
-    compras: 'bg-orange-100 text-orange-700',
-    bancos: 'bg-cyan-100 text-cyan-700',
-    autenticacion: 'bg-gray-100 text-gray-700'
+    usuarios_empresas: 'bg-purple-100 text-purple-700',
+    perfiles_usuario: 'bg-blue-100 text-blue-700',
+    empresas: 'bg-green-100 text-green-700',
+    periodos_contables: 'bg-orange-100 text-orange-700',
+    sucursales: 'bg-cyan-100 text-cyan-700'
+  }
+
+  const traducirAccion = (accion) => {
+    const traducciones = {
+      'INSERT': 'Crear',
+      'UPDATE': 'Modificar',
+      'DELETE': 'Eliminar'
+    }
+    return traducciones[accion] || accion
   }
 
   return (
@@ -113,12 +137,13 @@ export function PaginaAuditoria({ empresaId }) {
             ← Volver a Equipo
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">Registro de Auditoría</h1>
-          <p className="text-gray-600 mt-1">Historial completo de actividades</p>
+          <p className="text-gray-600 mt-1">Historial completo de actividades del sistema</p>
         </div>
 
         <button
           onClick={exportarLogs}
-          className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-all"
+          disabled={logs.length === 0}
+          className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Download className="w-5 h-5" />
           Exportar CSV
@@ -145,22 +170,22 @@ export function PaginaAuditoria({ empresaId }) {
             </div>
           </div>
 
-          {/* Módulo */}
+          {/* Tabla/Módulo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Módulo
+              Tabla
             </label>
             <select
               value={filtros.modulo}
               onChange={(e) => setFiltros({ ...filtros, modulo: e.target.value })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="todos">Todos</option>
-              <option value="equipo">Equipo</option>
-              <option value="contabilidad">Contabilidad</option>
-              <option value="ventas">Ventas</option>
-              <option value="compras">Compras</option>
-              <option value="bancos">Bancos</option>
+              <option value="todos">Todas</option>
+              <option value="usuarios_empresas">Usuarios</option>
+              <option value="perfiles_usuario">Perfiles</option>
+              <option value="empresas">Empresas</option>
+              <option value="periodos_contables">Periodos</option>
+              <option value="sucursales">Sucursales</option>
             </select>
           </div>
 
@@ -203,41 +228,54 @@ export function PaginaAuditoria({ empresaId }) {
                     Usuario
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Módulo
+                    Tabla
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acción
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Descripción
+                    IP
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {logs.map((log) => {
-                  const Icono = iconoPorModulo[log.modulo] || Activity
+                  const Icono = iconoPorModulo[log.tabla] || Activity
                   return (
                     <tr key={log.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(log.created_at).toLocaleString('es-PY')}
+                        {new Date(log.created_at).toLocaleString('es-PY', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {log.nombre_completo || 'Usuario'}
+                          {log.nombre_completo}
                         </div>
                         <div className="text-sm text-gray-500">{log.email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colorPorModulo[log.modulo] || 'bg-gray-100 text-gray-700'}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colorPorModulo[log.tabla] || 'bg-gray-100 text-gray-700'}`}>
                           <Icono className="w-3.5 h-3.5" />
-                          {log.modulo}
+                          {log.tabla?.replace('_', ' ')}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {log.accion.replace('_', ' ')}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          log.accion === 'INSERT' ? 'bg-green-100 text-green-700' :
+                          log.accion === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
+                          log.accion === 'DELETE' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {traducirAccion(log.accion)}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {log.descripcion}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {log.ip_address || '-'}
                       </td>
                     </tr>
                   )

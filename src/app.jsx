@@ -8,9 +8,9 @@ import { SolicitarPlan } from './paginas/planes/SolicitarPlan'
 import { supabase } from './configuracion/supabase'
 import { LayoutPrincipal } from './componentes/diseño/LayoutPrincipal.jsx'
 import { Dashboard } from './paginas/dashboard/Dashboard'
-import { GestionEquipo } from './paginas/equipo/GestionEquipo'
-import { PaginaAuditoria } from './paginas/equipo/PaginaAuditoria'
-import { PaginaMetricas } from './paginas/equipo/PaginaMetricas'
+import GestionEquipo from './paginas/equipo/GestionEquipo'
+import PaginaAuditoria from './paginas/equipo/PaginaAuditoria'
+import PaginaMetricas from './paginas/equipo/PaginaMetricas'
 
 function App() {
   const { usuario, cargando } = useAutenticacion()
