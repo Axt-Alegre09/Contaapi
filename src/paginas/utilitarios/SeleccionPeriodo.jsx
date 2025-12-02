@@ -1,0 +1,141 @@
+// src/paginas/utilitarios/SeleccionPeriodo.jsx
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '@/configuracion/supabase'
+
+export default function SeleccionPeriodo() {
+  const [periodos, setPeriodos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    cargarPeriodos()
+  }, [])
+
+  const cargarPeriodos = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Obtener periodos disponibles desde la tabla periodos_fiscales
+      const { data, error } = await supabase
+        .from('periodos_fiscales')
+        .select('*')
+        .order('anio', { ascending: false })
+
+      if (error) throw error
+
+      setPeriodos(data || [])
+    } catch (error) {
+      console.error('Error cargando periodos:', error)
+      setError('Error al cargar los periodos disponibles')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const seleccionarPeriodo = (periodo) => {
+    navigate('/seleccion-empresa', { 
+      state: { 
+        periodo: {
+          id: periodo.id,
+          anio: periodo.anio,
+          fechaDesde: periodo.fecha_desde,
+          fechaHasta: periodo.fecha_hasta
+        }
+      } 
+    })
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="bg-white p-8 rounded-lg shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="text-gray-700">Cargando periodos...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <div className="text-center">
+            <div className="text-red-600 text-5xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={cargarPeriodos}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">ContaAPI</h1>
+          <h2 className="text-xl font-semibold text-gray-700">Selección de Periodo</h2>
+          <p className="text-gray-500 text-sm mt-2">
+            Selecciona el ejercicio fiscal con el que deseas trabajar
+          </p>
+        </div>
+        
+        <div className="space-y-3">
+          {periodos.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No hay periodos disponibles</p>
+            </div>
+          ) : (
+            periodos.map((periodo) => (
+              <button
+                key={periodo.id}
+                onClick={() => seleccionarPeriodo(periodo)}
+                className="w-full p-4 text-left border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 group"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition-colors">
+                      EJERCICIO FISCAL {periodo.anio}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {new Date(periodo.fecha_desde).toLocaleDateString('es-PY')} - {new Date(periodo.fecha_hasta).toLocaleDateString('es-PY')}
+                    </div>
+                  </div>
+                  <svg 
+                    className="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="w-full text-center text-gray-600 hover:text-gray-800 text-sm"
+          >
+            ← Volver al inicio
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
