@@ -119,12 +119,14 @@ export function SelectorEmpresa() {
             filter: 'blur(3px)'
           }}
         />
-        <div className="absolute inset-0 bg-black/60" />
+        {/* Overlay CON DARK MODE */}
+        <div className="absolute inset-0 bg-black/60 dark:bg-black/80" />
         
-        <div className="relative z-10 bg-white p-8 rounded-lg shadow-lg">
+        {/* Contenido CON DARK MODE */}
+        <div className="relative z-10 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
           <div className="flex items-center gap-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="text-gray-700">Cargando empresas...</span>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+            <span className="text-gray-700 dark:text-gray-300">Cargando empresas...</span>
           </div>
         </div>
       </div>
@@ -141,16 +143,18 @@ export function SelectorEmpresa() {
             filter: 'blur(3px)'
           }}
         />
-        <div className="absolute inset-0 bg-black/60" />
+        {/* Overlay CON DARK MODE */}
+        <div className="absolute inset-0 bg-black/60 dark:bg-black/80" />
         
-        <div className="relative z-10 bg-white p-8 rounded-lg shadow-lg max-w-md">
+        {/* Contenido CON DARK MODE */}
+        <div className="relative z-10 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md">
           <div className="text-center">
-            <div className="text-red-600 text-5xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Error</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
+            <div className="text-red-600 dark:text-red-400 text-5xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Error</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
             <button
               onClick={() => navigate('/seleccion-periodo')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
             >
               Volver a periodos
             </button>
@@ -169,13 +173,15 @@ export function SelectorEmpresa() {
           filter: 'blur(3px)'
         }}
       />
-      <div className="absolute inset-0 bg-black/60" />
+      {/* Overlay CON DARK MODE */}
+      <div className="absolute inset-0 bg-black/60 dark:bg-black/80" />
       
-      <div className="relative z-10 bg-white p-8 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+      {/* Contenido CON DARK MODE */}
+      <div className="relative z-10 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="mb-6">
           <button
             onClick={() => navigate('/seleccion-periodo')}
-            className="text-blue-600 hover:text-blue-700 mb-4 flex items-center gap-2 transition-colors"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-4 flex items-center gap-2 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -189,19 +195,19 @@ export function SelectorEmpresa() {
               alt="ContaAPI Logo" 
               className="w-12 h-12 mx-auto mb-3 rounded-xl shadow-lg object-contain"
             />
-            <h2 className="text-2xl font-bold text-gray-800">Selección de Empresa</h2>
-            <div className="mt-2 inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-full">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Selección de Empresa</h2>
+            <div className="mt-2 inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
               <span className="font-semibold">Periodo: {periodoSeleccionado?.anio}</span>
             </div>
           </div>
         </div>
 
-        {/* Buscador */}
+        {/* Buscador CON DARK MODE */}
         {empresas.length > 0 && (
           <div className="mb-4">
             <div className="relative">
               <svg 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500"
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -213,12 +219,12 @@ export function SelectorEmpresa() {
                 placeholder="Buscar empresa por nombre, RUC o rol..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               />
               {busqueda && (
                 <button
                   onClick={() => setBusqueda('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -227,29 +233,29 @@ export function SelectorEmpresa() {
               )}
             </div>
             {busqueda && (
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                 {empresasFiltradas.length} {empresasFiltradas.length === 1 ? 'empresa encontrada' : 'empresas encontradas'}
               </p>
             )}
           </div>
         )}
         
-        {/* Lista de empresas con scroll */}
+        {/* Lista de empresas con scroll CON DARK MODE */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-2">
           {empresasFiltradas.length === 0 ? (
             <div className="text-center py-8">
               {empresas.length === 0 ? (
                 <>
-                  <p className="text-gray-500 mb-4">No tienes empresas asignadas en este periodo</p>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">No tienes empresas asignadas en este periodo</p>
                   <button
                     onClick={() => navigate('/seleccion-periodo')}
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     Seleccionar otro periodo
                   </button>
                 </>
               ) : (
-                <p className="text-gray-500">No se encontraron empresas con "{busqueda}"</p>
+                <p className="text-gray-500 dark:text-gray-400">No se encontraron empresas con "{busqueda}"</p>
               )}
             </div>
           ) : (
@@ -257,24 +263,24 @@ export function SelectorEmpresa() {
               <button
                 key={empresa.id}
                 onClick={() => seleccionarEmpresa(empresa)}
-                className="w-full p-4 text-left border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 group"
+                className="w-full p-4 text-left border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition-colors">
+                    <div className="font-bold text-lg text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {empresa.nombre}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       RUC: {empresa.ruc}
                     </div>
                     <div className="mt-2">
-                      <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                      <span className="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full">
                         {empresa.rol}
                       </span>
                     </div>
                   </div>
                   <svg 
-                    className="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" 
+                    className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
