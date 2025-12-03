@@ -1,6 +1,6 @@
 /**
  * Editar Empresa - ContaAPI v2
- * Formulario de edición con notificaciones
+ * MOBILE-FIRST - Formulario responsive optimizado
  */
 
 import { useState, useEffect } from 'react'
@@ -129,10 +129,10 @@ export default function EditarEmpresa() {
     return (
       <>
         <NotificacionContainer />
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center p-4">
           <div className="text-center">
-            <RefreshCw className="w-12 h-12 text-gray-400 dark:text-gray-500 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">Cargando datos de la empresa...</p>
+            <RefreshCw className="w-10 h-10 md:w-12 md:h-12 text-gray-400 dark:text-gray-500 animate-spin mx-auto mb-4" />
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">Cargando datos de la empresa...</p>
           </div>
         </div>
       </>
@@ -143,32 +143,30 @@ export default function EditarEmpresa() {
     <>
       <NotificacionContainer />
       
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/empresas')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Editar Empresa</h1>
-                <p className="text-gray-600 dark:text-gray-400">Actualiza los datos de la empresa</p>
-              </div>
+      <div className="space-y-4 md:space-y-6">
+        {/* Header - Mobile Optimized */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-4 md:p-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/empresas')}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </button>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Building2 className="w-5 h-5 md:w-6 md:h-6 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Editar Empresa</h1>
+              <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 truncate">Actualiza los datos de la empresa</p>
             </div>
           </div>
         </div>
 
-        {/* Formulario */}
-        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+        {/* Formulario - Grid responsive */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-4 md:p-6">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Nombre Comercial */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -179,11 +177,11 @@ export default function EditarEmpresa() {
                   name="nombreComercial"
                   value={formData.nombreComercial}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
+                  className={`w-full px-4 py-2.5 md:py-2 border ${
                     errores.nombreComercial 
                       ? 'border-red-500 dark:border-red-400' 
                       : 'border-gray-300 dark:border-gray-600'
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base`}
                 />
                 {errores.nombreComercial && (
                   <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errores.nombreComercial}</p>
@@ -200,11 +198,11 @@ export default function EditarEmpresa() {
                   name="razonSocial"
                   value={formData.razonSocial}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
+                  className={`w-full px-4 py-2.5 md:py-2 border ${
                     errores.razonSocial 
                       ? 'border-red-500 dark:border-red-400' 
                       : 'border-gray-300 dark:border-gray-600'
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base`}
                 />
                 {errores.razonSocial && (
                   <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errores.razonSocial}</p>
@@ -221,11 +219,11 @@ export default function EditarEmpresa() {
                   name="ruc"
                   value={formData.ruc}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
+                  className={`w-full px-4 py-2.5 md:py-2 border ${
                     errores.ruc 
                       ? 'border-red-500 dark:border-red-400' 
                       : 'border-gray-300 dark:border-gray-600'
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base`}
                 />
                 {errores.ruc && (
                   <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errores.ruc}</p>
@@ -241,7 +239,7 @@ export default function EditarEmpresa() {
                   name="tipoContribuyente"
                   value={formData.tipoContribuyente}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                 >
                   {TIPOS_CONTRIBUYENTE.map(tipo => (
                     <option key={tipo.value} value={tipo.value}>
@@ -252,7 +250,7 @@ export default function EditarEmpresa() {
               </div>
 
               {/* Dirección */}
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Dirección
                 </label>
@@ -261,7 +259,7 @@ export default function EditarEmpresa() {
                   name="direccion"
                   value={formData.direccion}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                 />
               </div>
 
@@ -275,7 +273,7 @@ export default function EditarEmpresa() {
                   name="telefono"
                   value={formData.telefono}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                 />
               </div>
 
@@ -289,12 +287,12 @@ export default function EditarEmpresa() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                 />
               </div>
 
               {/* Moneda Base */}
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Moneda Base
                 </label>
@@ -302,7 +300,7 @@ export default function EditarEmpresa() {
                   name="monedaBase"
                   value={formData.monedaBase}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                 >
                   {MONEDAS.map(moneda => (
                     <option key={moneda.value} value={moneda.value}>
@@ -313,20 +311,20 @@ export default function EditarEmpresa() {
               </div>
             </div>
 
-            {/* Botones */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+            {/* Botones - Stack en móvil */}
+            <div className="flex flex-col md:flex-row justify-end gap-3 pt-4 md:pt-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 type="button"
                 onClick={() => navigate('/empresas')}
                 disabled={guardando}
-                className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
+                className="w-full md:w-auto px-6 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors text-base md:text-sm font-medium"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={guardando}
-                className="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                className="w-full md:w-auto px-6 py-2.5 md:py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors text-base md:text-sm font-medium"
               >
                 <Save className="w-5 h-5" />
                 {guardando ? 'Guardando...' : 'Guardar Cambios'}

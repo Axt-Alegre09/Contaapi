@@ -1,6 +1,6 @@
 /**
  * Nueva Empresa - ContaAPI v2
- * Formulario completo con notificaciones y periodos funcionando
+ * MOBILE-FIRST - Formulario responsive con pestañas optimizadas
  */
 import { crearPeriodosIniciales } from "../../utilidades/crearPeriodosIniciales";
 import { useState, useEffect } from "react";
@@ -214,8 +214,8 @@ export default function NuevaEmpresa() {
     switch (pestañaActiva) {
       case "datos":
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Nombre Comercial */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -226,11 +226,11 @@ export default function NuevaEmpresa() {
                   name="nombreComercial"
                   value={formData.nombreComercial}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
+                  className={`w-full px-4 py-2.5 md:py-2 border ${
                     errores.nombreComercial
                       ? "border-red-500 dark:border-red-400"
                       : "border-gray-300 dark:border-gray-600"
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base`}
                   placeholder="Ej: Distribuidora del Este"
                 />
                 {errores.nombreComercial && (
@@ -250,11 +250,11 @@ export default function NuevaEmpresa() {
                   name="razonSocial"
                   value={formData.razonSocial}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
+                  className={`w-full px-4 py-2.5 md:py-2 border ${
                     errores.razonSocial
                       ? "border-red-500 dark:border-red-400"
                       : "border-gray-300 dark:border-gray-600"
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base`}
                   placeholder="Ej: Distribuidora del Este S.A."
                 />
                 {errores.razonSocial && (
@@ -274,11 +274,11 @@ export default function NuevaEmpresa() {
                   name="ruc"
                   value={formData.ruc}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
+                  className={`w-full px-4 py-2.5 md:py-2 border ${
                     errores.ruc
                       ? "border-red-500 dark:border-red-400"
                       : "border-gray-300 dark:border-gray-600"
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base`}
                   placeholder="80012345-6"
                 />
                 {errores.ruc && (
@@ -297,7 +297,7 @@ export default function NuevaEmpresa() {
                   name="tipoContribuyente"
                   value={formData.tipoContribuyente}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                 >
                   {TIPOS_CONTRIBUYENTE.map((tipo) => (
                     <option key={tipo.value} value={tipo.value}>
@@ -308,7 +308,7 @@ export default function NuevaEmpresa() {
               </div>
 
               {/* Dirección */}
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Dirección
                 </label>
@@ -317,7 +317,7 @@ export default function NuevaEmpresa() {
                   name="direccion"
                   value={formData.direccion}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                   placeholder="Av. Eusebio Ayala Km 4.5"
                 />
               </div>
@@ -332,7 +332,7 @@ export default function NuevaEmpresa() {
                   name="telefono"
                   value={formData.telefono}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                   placeholder="021-555-0001"
                 />
               </div>
@@ -347,7 +347,7 @@ export default function NuevaEmpresa() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                   placeholder="contacto@empresa.com.py"
                 />
               </div>
@@ -357,19 +357,19 @@ export default function NuevaEmpresa() {
 
       case "configuracion":
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Periodo Fiscal */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Periodo Fiscal *
                 </label>
                 {cargandoPeriodos ? (
-                  <div className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                  <div className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-base">
                     Cargando periodos...
                   </div>
                 ) : periodos.length === 0 ? (
-                  <div className="w-full px-4 py-2 border border-amber-300 dark:border-amber-600 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+                  <div className="w-full px-4 py-2.5 md:py-2 border border-amber-300 dark:border-amber-600 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-sm">
                     No hay periodos disponibles
                   </div>
                 ) : (
@@ -377,11 +377,11 @@ export default function NuevaEmpresa() {
                     name="periodoFiscal"
                     value={formData.periodoFiscal}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border ${
+                    className={`w-full px-4 py-2.5 md:py-2 border ${
                       errores.periodoFiscal
                         ? "border-red-500 dark:border-red-400"
                         : "border-gray-300 dark:border-gray-600"
-                    } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                    } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base`}
                   >
                     <option value="">Seleccionar periodo</option>
                     {periodos.map((periodo) => (
@@ -408,7 +408,7 @@ export default function NuevaEmpresa() {
                   name="monedaBase"
                   value={formData.monedaBase}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                 >
                   {MONEDAS.map((moneda) => (
                     <option key={moneda.value} value={moneda.value}>
@@ -419,7 +419,7 @@ export default function NuevaEmpresa() {
               </div>
 
               {/* Fecha Desde */}
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Fecha de Inicio
                 </label>
@@ -428,7 +428,7 @@ export default function NuevaEmpresa() {
                   name="fechaDesde"
                   value={formData.fechaDesde}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
                 />
               </div>
             </div>
@@ -454,69 +454,69 @@ export default function NuevaEmpresa() {
 
       case "obligaciones":
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Contribuyente de IRP */}
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 md:p-6">
               <div className="flex items-start gap-3 mb-4">
                 <input
                   type="checkbox"
                   name="contribuyenteIRP"
                   checked={formData.contribuyenteIRP}
                   onChange={handleChange}
-                  className="mt-1 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="mt-1 w-5 h-5 md:w-4 md:h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
                 <div className="flex-1">
-                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                  <label className="text-sm md:text-base font-medium text-gray-900 dark:text-white">
                     Contribuyente de I.R.P. (Impuesto a la Renta Personal)
                   </label>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Marcar si la empresa es contribuyente del IRP
                   </p>
                 </div>
               </div>
 
               {formData.contribuyenteIRP && (
-                <div className="ml-7">
+                <div className="ml-8 md:ml-7">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Tipo de IRP *
                   </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2">
+                  <div className="space-y-2 md:space-y-3">
+                    <label className="flex items-center gap-2 md:gap-3">
                       <input
                         type="radio"
                         name="tipoIRP"
                         value="servicios"
                         checked={formData.tipoIRP === "servicios"}
                         onChange={handleChange}
-                        className="w-4 h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                        className="w-5 h-5 md:w-4 md:h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
-                      <span className="text-sm text-gray-900 dark:text-white">
+                      <span className="text-sm md:text-base text-gray-900 dark:text-white">
                         Prestador de Servicios
                       </span>
                     </label>
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 md:gap-3">
                       <input
                         type="radio"
                         name="tipoIRP"
                         value="dependencia"
                         checked={formData.tipoIRP === "dependencia"}
                         onChange={handleChange}
-                        className="w-4 h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                        className="w-5 h-5 md:w-4 md:h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
-                      <span className="text-sm text-gray-900 dark:text-white">
+                      <span className="text-sm md:text-base text-gray-900 dark:text-white">
                         En relación de dependencia
                       </span>
                     </label>
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 md:gap-3">
                       <input
                         type="radio"
                         name="tipoIRP"
                         value="rentas"
                         checked={formData.tipoIRP === "rentas"}
                         onChange={handleChange}
-                        className="w-4 h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                        className="w-5 h-5 md:w-4 md:h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
-                      <span className="text-sm text-gray-900 dark:text-white">
+                      <span className="text-sm md:text-base text-gray-900 dark:text-white">
                         Rentas y Ganancias de Capital
                       </span>
                     </label>
@@ -531,8 +531,8 @@ export default function NuevaEmpresa() {
             </div>
 
             {/* Otros Impuestos */}
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-4">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 md:p-6">
+              <h3 className="text-sm md:text-base font-medium text-gray-900 dark:text-white mb-3 md:mb-4">
                 Otros Impuestos
               </h3>
               <div className="space-y-3">
@@ -542,10 +542,10 @@ export default function NuevaEmpresa() {
                     name="tieneIVA"
                     checked={formData.tieneIVA}
                     onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="mt-0.5 w-5 h-5 md:w-4 md:h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    <span className="text-sm md:text-base font-medium text-gray-900 dark:text-white">
                       I.V.A. (Impuesto al Valor Agregado)
                     </span>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -560,10 +560,10 @@ export default function NuevaEmpresa() {
                     name="tieneIRE"
                     checked={formData.tieneIRE}
                     onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="mt-0.5 w-5 h-5 md:w-4 md:h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    <span className="text-sm md:text-base font-medium text-gray-900 dark:text-white">
                       I.R.E.
                     </span>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -578,10 +578,10 @@ export default function NuevaEmpresa() {
                     name="tieneIDU"
                     checked={formData.tieneIDU}
                     onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="mt-0.5 w-5 h-5 md:w-4 md:h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    <span className="text-sm md:text-base font-medium text-gray-900 dark:text-white">
                       I.D.U.
                     </span>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -596,10 +596,10 @@ export default function NuevaEmpresa() {
                     name="tieneINR"
                     checked={formData.tieneINR}
                     onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="mt-0.5 w-5 h-5 md:w-4 md:h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    <span className="text-sm md:text-base font-medium text-gray-900 dark:text-white">
                       I.N.R. (Empresas Extranjeras)
                     </span>
                   </div>
@@ -608,20 +608,20 @@ export default function NuevaEmpresa() {
             </div>
 
             {/* Exportador */}
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 md:p-6">
               <label className="flex items-start gap-3">
                 <input
                   type="checkbox"
                   name="esExportador"
                   checked={formData.esExportador}
                   onChange={handleChange}
-                  className="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="mt-0.5 w-5 h-5 md:w-4 md:h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
                 <div>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-sm md:text-base font-medium text-gray-900 dark:text-white">
                     ¿Es exportador?
                   </span>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Marcar si la empresa realiza operaciones de exportación
                   </p>
                 </div>
@@ -639,35 +639,33 @@ export default function NuevaEmpresa() {
     <>
       <NotificacionContainer />
 
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate("/empresas")}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Nueva Empresa
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Completa los datos para crear una nueva empresa
-                </p>
-              </div>
+      <div className="space-y-4 md:space-y-6">
+        {/* Header - Mobile Optimized */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-4 md:p-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/empresas")}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </button>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Building2 className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+                Nueva Empresa
+              </h1>
+              <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 truncate">
+                Completa los datos para crear una nueva empresa
+              </p>
             </div>
           </div>
         </div>
 
         {/* Formulario con pestañas */}
         <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
-          {/* Pestañas */}
+          {/* Pestañas - Solo íconos en móvil, texto completo en desktop */}
           <div className="border-b border-gray-200 dark:border-gray-700">
             <div className="flex">
               {PESTAÑAS.map((pestaña) => {
@@ -676,14 +674,15 @@ export default function NuevaEmpresa() {
                   <button
                     key={pestaña.id}
                     onClick={() => setPestañaActiva(pestaña.id)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
+                    className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium transition-colors ${
                       pestañaActiva === pestaña.id
                         ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
                         : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
-                    <span className="hidden lg:inline">{pestaña.label}</span>
+                    <span className="md:hidden text-xs">{pestaña.id === 'datos' ? 'Datos' : pestaña.id === 'configuracion' ? 'Config' : 'Fiscales'}</span>
+                    <span className="hidden md:inline">{pestaña.label}</span>
                   </button>
                 );
               })}
@@ -692,22 +691,22 @@ export default function NuevaEmpresa() {
 
           {/* Contenido de la pestaña */}
           <form onSubmit={handleSubmit}>
-            <div className="p-6">{renderPestaña()}</div>
+            <div className="p-4 md:p-6">{renderPestaña()}</div>
 
-            {/* Botones de acción */}
-            <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-700 flex justify-end gap-3">
+            {/* Botones de acción - Stack en móvil */}
+            <div className="border-t border-gray-200 dark:border-gray-700 p-4 md:p-6 bg-gray-50 dark:bg-gray-700 flex flex-col md:flex-row justify-end gap-3">
               <button
                 type="button"
                 onClick={() => navigate("/empresas")}
                 disabled={loading}
-                className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
+                className="w-full md:w-auto px-6 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors text-base md:text-sm font-medium"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading || periodos.length === 0}
-                className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                className="w-full md:w-auto px-6 py-2.5 md:py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors text-base md:text-sm font-medium"
               >
                 <Save className="w-5 h-5" />
                 {loading ? "Creando..." : "Crear Empresa"}

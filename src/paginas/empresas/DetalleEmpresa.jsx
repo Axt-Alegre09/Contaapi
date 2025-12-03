@@ -1,6 +1,6 @@
 /**
  * Detalle Empresa - ContaAPI v2
- * Vista de solo lectura con notificaciones
+ * MOBILE-FIRST - Vista responsive optimizada
  */
 
 import { useState, useEffect } from 'react'
@@ -49,8 +49,6 @@ export default function DetalleEmpresa() {
   }
 
   const abrirModalEliminar = () => {
-    // Validar permisos (esto debería venir del rol del usuario)
-    // Por ahora asumimos que puede eliminar
     setModalEliminar(true)
   }
 
@@ -105,10 +103,10 @@ export default function DetalleEmpresa() {
     return (
       <>
         <NotificacionContainer />
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center p-4">
           <div className="text-center">
-            <RefreshCw className="w-12 h-12 text-gray-400 dark:text-gray-500 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">Cargando datos de la empresa...</p>
+            <RefreshCw className="w-10 h-10 md:w-12 md:h-12 text-gray-400 dark:text-gray-500 animate-spin mx-auto mb-4" />
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">Cargando datos de la empresa...</p>
           </div>
         </div>
       </>
@@ -121,104 +119,114 @@ export default function DetalleEmpresa() {
     <>
       <NotificacionContainer />
       
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
+      <div className="space-y-4 md:space-y-6">
+        {/* Header - Mobile Optimized */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-4 md:p-6">
+          <div className="flex flex-col gap-4">
+            {/* Primera fila: Back + Info */}
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate('/empresas')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-lg md:text-xl flex-shrink-0">
                 {empresa.nombre_comercial?.charAt(0).toUpperCase()}
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{empresa.nombre_comercial}</h1>
-                <p className="text-gray-600 dark:text-gray-400">{empresa.razon_social}</p>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white truncate">
+                  {empresa.nombre_comercial}
+                </h1>
+                <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 truncate">
+                  {empresa.razon_social}
+                </p>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            {/* Segunda fila: Botones - Stack en móvil */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Link
                 to={`/empresas/${id}/editar`}
-                className="px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 flex items-center gap-2 transition-colors"
+                className="flex-1 sm:flex-none px-4 py-2.5 md:py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 flex items-center justify-center gap-2 transition-colors text-base md:text-sm font-medium"
               >
-                <Edit2 className="w-5 h-5" />
+                <Edit2 className="w-5 h-5 md:w-4 md:h-4" />
                 Editar
               </Link>
               <button
                 onClick={abrirModalEliminar}
-                className="px-4 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 flex items-center gap-2 transition-colors"
+                className="flex-1 sm:flex-none px-4 py-2.5 md:py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 flex items-center justify-center gap-2 transition-colors text-base md:text-sm font-medium"
               >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
                 Eliminar
               </button>
             </div>
           </div>
         </div>
 
-        {/* Información Principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Información Principal - Stack en móvil, Grid en desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Datos Generales */}
-          <div className="lg:col-span-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <div className="lg:col-span-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-4 md:p-6">
+            <h2 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-4 md:mb-6 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Datos Generales
             </h2>
             
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               <div>
-                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">RUC</label>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white font-mono">{empresa.ruc}</p>
+                <label className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">RUC</label>
+                <p className="text-base md:text-lg font-semibold text-gray-900 dark:text-white font-mono">{empresa.ruc}</p>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Tipo de Contribuyente</label>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <label className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Tipo de Contribuyente</label>
+                <p className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">
                   {getTipoContribuyenteLabel(empresa.tipo_contribuyente)}
                 </p>
               </div>
 
               {empresa.direccion && (
-                <div className="col-span-2">
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <div className="sm:col-span-2">
+                  <label className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
                     Dirección
                   </label>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">{empresa.direccion}</p>
+                  <p className="text-base md:text-lg font-semibold text-gray-900 dark:text-white break-words">
+                    {empresa.direccion}
+                  </p>
                 </div>
               )}
 
               {empresa.telefono && (
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <label className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                     <Phone className="w-4 h-4" />
                     Teléfono
                   </label>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">{empresa.telefono}</p>
+                  <p className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{empresa.telefono}</p>
                 </div>
               )}
 
               {empresa.email && (
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <label className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                     <Mail className="w-4 h-4" />
                     Email
                   </label>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">{empresa.email}</p>
+                  <p className="text-base md:text-lg font-semibold text-gray-900 dark:text-white break-all">
+                    {empresa.email}
+                  </p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Información Adicional */}
-          <div className="space-y-6">
+          {/* Información Adicional - Stack de cards */}
+          <div className="space-y-4 md:space-y-6">
             {/* Estado */}
-            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Estado</h3>
+            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-4 md:p-6">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Estado</h3>
               <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
                 empresa.estado === 'activa'
                   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
@@ -229,17 +237,17 @@ export default function DetalleEmpresa() {
             </div>
 
             {/* Moneda Base */}
-            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
+            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-4 md:p-6">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 Moneda Base
               </h3>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{empresa.moneda_base}</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{empresa.moneda_base}</p>
             </div>
 
             {/* Fechas */}
-            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2">
+            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-4 md:p-6">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 md:mb-4 flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 Información Temporal
               </h3>
