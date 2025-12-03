@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAutenticacion } from './hooks/useAutenticacion'
 import { EmpresaProvider } from './contextos/EmpresaContext'
-import { ThemeProvider } from './contextos/ThemeContext' // ← NUEVO
+import { ThemeProvider } from './contextos/ThemeContext'
 import { Login } from './paginas/autenticacion/Login'
 import { RestablecerContrasena } from './paginas/autenticacion/RestablecerContrasena'
 import { Planes } from './paginas/planes/Planes'
@@ -17,6 +17,13 @@ import { Dashboard } from './paginas/dashboard/Dashboard'
 import GestionEquipo from './paginas/equipo/GestionEquipo'
 import PaginaAuditoria from './paginas/equipo/PaginaAuditoria'
 import PaginaMetricas from './paginas/equipo/PaginaMetricas'
+
+// ========== NUEVOS IMPORTS DE EMPRESAS ==========
+import ListaEmpresas from './paginas/empresas/ListaEmpresas'
+import NuevaEmpresa from './paginas/empresas/NuevaEmpresa'
+import EditarEmpresa from './paginas/empresas/EditarEmpresa'
+import DetalleEmpresa from './paginas/empresas/DetalleEmpresa'
+// ================================================
 
 function App() {
   const { usuario, cargando } = useAutenticacion()
@@ -48,10 +55,10 @@ function App() {
 
   return (
     <BrowserRouter>
-      <ThemeProvider> {/* ← NUEVO: Envolver todo con ThemeProvider */}
+      <ThemeProvider>
         <EmpresaProvider>
           <Routes>
-            {/* Todas las rutas igual que antes */}
+            {/* Rutas Públicas */}
             <Route 
               path="/login" 
               element={usuario ? <Navigate to="/seleccion-periodo" replace /> : <Login />} 
@@ -62,6 +69,7 @@ function App() {
               element={<RestablecerContrasena />} 
             />
             
+            {/* Rutas de Selección */}
             <Route 
               path="/seleccion-periodo" 
               element={usuario ? <SeleccionPeriodo /> : <Navigate to="/login" replace />} 
@@ -72,6 +80,7 @@ function App() {
               element={usuario ? <SelectorEmpresa /> : <Navigate to="/login" replace />} 
             />
             
+            {/* Rutas de Planes */}
             <Route 
               path="/planes" 
               element={usuario ? <Planes /> : <Navigate to="/login" replace />} 
@@ -82,6 +91,7 @@ function App() {
               element={usuario ? <SolicitarPlan /> : <Navigate to="/login" replace />} 
             />
             
+            {/* Dashboard */}
             <Route 
               path="/dashboard" 
               element={
@@ -97,6 +107,69 @@ function App() {
               } 
             />
 
+            {/* ========== NUEVAS RUTAS DE EMPRESAS ========== */}
+            <Route 
+              path="/empresas" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <ListaEmpresas />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            <Route 
+              path="/empresas/nueva" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <NuevaEmpresa />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            <Route 
+              path="/empresas/:id" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <DetalleEmpresa />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            <Route 
+              path="/empresas/:id/editar" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <EditarEmpresa />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+            {/* ============================================== */}
+
+            {/* Rutas de Equipo */}
             <Route 
               path="/equipo" 
               element={
@@ -142,6 +215,7 @@ function App() {
               } 
             />
 
+            {/* Rutas por defecto */}
             <Route 
               path="/" 
               element={<Navigate to="/login" replace />} 
