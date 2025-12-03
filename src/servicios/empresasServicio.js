@@ -163,27 +163,40 @@ class EmpresasServicio {
      */
     async eliminarEmpresa(empresaId) {
         try {
-            // Cambiar estado a inactiva
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('No hay usuario autenticado')
+
+            // 1. Cambiar estado de la empresa a inactiva
             const { error: errorEmpresa } = await supabase
                 .from('empresas')
                 .update({
                     estado: 'inactiva',
-                    deleted_at: new Date().toISOString()
+                    deleted_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 })
                 .eq('id', empresaId)
 
-            if (errorEmpresa) throw errorEmpresa
+            if (errorEmpresa) {
+                console.error('Error al actualizar empresa:', errorEmpresa)
+                throw errorEmpresa
+            }
 
-            // Marcar relaciones como eliminadas
+            // 2. Marcar TODAS las relaciones de la empresa como eliminadas
+            // (no solo las del usuario actual, sino todas)
             const { error: errorRelaciones } = await supabase
                 .from('usuarios_empresas')
                 .update({
                     estado: 'eliminado',
-                    deleted_at: new Date().toISOString()
+                    deleted_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 })
                 .eq('empresa_id', empresaId)
+                .is('deleted_at', null) // Solo actualizar las que no están ya eliminadas
 
-            if (errorRelaciones) throw errorRelaciones
+            if (errorRelaciones) {
+                console.error('Error al actualizar relaciones:', errorRelaciones)
+                throw errorRelaciones
+            }
 
             return true
         } catch (error) {
