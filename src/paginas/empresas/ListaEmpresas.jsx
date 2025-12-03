@@ -84,29 +84,41 @@ export default function ListaEmpresas() {
   }
 
   const confirmarEliminar = async (password) => {
-    try {
-      // Verificar contraseña del usuario actual
-      const { error: errorAuth } = await supabase.auth.signInWithPassword({
-        email: (await supabase.auth.getUser()).data.user.email,
-        password: password
-      })
+  try {
+    // Verificar contraseña del usuario actual
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    const { error: errorAuth } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: password
+    })
 
-      if (errorAuth) {
-        error('Contraseña incorrecta')
-        throw new Error('Contraseña incorrecta')
-      }
-
-      // Eliminar empresa
-      await empresasServicio.eliminarEmpresa(empresaAEliminar.id)
-      success('Empresa eliminada exitosamente')
-      cargarDatos()
-    } catch (err) {
-      if (err.message !== 'Contraseña incorrecta') {
-        error('Error al eliminar la empresa')
-      }
-      throw err
+    if (errorAuth) {
+      error('Contraseña incorrecta')
+      throw new Error('Contraseña incorrecta')
     }
+
+    // Eliminar empresa
+    await empresasServicio.eliminarEmpresa(empresaAEliminar.id)
+    
+    // Cerrar modal
+    setModalEliminar(false)
+    setEmpresaAEliminar(null)
+    
+    // Mostrar éxito
+    success('Empresa eliminada exitosamente')
+    
+    // Recargar lista
+    await cargarDatos()
+  } catch (err) {
+    console.error('Error en confirmarEliminar:', err)
+    // Solo mostrar error si NO es por contraseña incorrecta
+    if (err.message !== 'Contraseña incorrecta') {
+      error('Error al eliminar la empresa')
+    }
+    throw err
   }
+}
 
   const formatearFecha = (fecha) => {
     if (!fecha) return 'N/A'
