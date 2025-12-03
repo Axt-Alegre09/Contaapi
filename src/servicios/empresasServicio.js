@@ -158,52 +158,52 @@ class EmpresasServicio {
         }
     }
 
-    /**
-     * Eliminar empresa (soft delete)
-     */
-    async eliminarEmpresa(empresaId) {
-        try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('No hay usuario autenticado')
+/**
+ * Eliminar empresa (soft delete)
+ */
+async eliminarEmpresa(empresaId) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('No hay usuario autenticado')
 
-            // 1. Cambiar estado de la empresa a inactiva
-            const { error: errorEmpresa } = await supabase
-                .from('empresas')
-                .update({
-                    estado: 'inactiva',
-                    deleted_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', empresaId)
+    // 1. Marcar la empresa como inactiva
+    const { error: errorEmpresa } = await supabase
+      .from('empresas')
+      .update({
+        estado: 'inactiva',
+        deleted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', empresaId)
 
-            if (errorEmpresa) {
-                console.error('Error al actualizar empresa:', errorEmpresa)
-                throw errorEmpresa
-            }
-
-            // 2. Marcar TODAS las relaciones de la empresa como eliminadas
-            // (no solo las del usuario actual, sino todas)
-            const { error: errorRelaciones } = await supabase
-                .from('usuarios_empresas')
-                .update({
-                    estado: 'eliminado',
-                    deleted_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
-                .eq('empresa_id', empresaId)
-                .is('deleted_at', null) // Solo actualizar las que no están ya eliminadas
-
-            if (errorRelaciones) {
-                console.error('Error al actualizar relaciones:', errorRelaciones)
-                throw errorRelaciones
-            }
-
-            return true
-        } catch (error) {
-            console.error('Error al eliminar empresa:', error)
-            throw new Error('Error al eliminar la empresa')
-        }
+    if (errorEmpresa) {
+      console.error('Error al actualizar empresa:', errorEmpresa)
+      throw errorEmpresa
     }
+
+    // 2. Marcar SOLO mi relación con la empresa como eliminada
+    const { error: errorRelacion } = await supabase
+      .from('usuarios_empresas')
+      .update({
+        estado: 'eliminado',
+        deleted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('empresa_id', empresaId)
+      .eq('user_id', user.id) // Solo mi relación
+      .is('deleted_at', null)
+
+    if (errorRelacion) {
+      console.error('Error al actualizar mi relación:', errorRelacion)
+      throw errorRelacion
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error al eliminar empresa:', error)
+    throw new Error(error.message || 'Error al eliminar la empresa')
+  }
+}
 
     /**
      * Obtener estadísticas de empresas
