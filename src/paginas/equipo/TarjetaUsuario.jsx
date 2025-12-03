@@ -1,6 +1,6 @@
 /**
  * Tarjeta de Usuario - ContaAPI v2
- * src/paginas/equipo/TarjetaUsuario.jsx
+ * MOBILE-FIRST - Card responsive optimizada
  */
 
 import { Edit2, Trash2, Mail, Phone, Calendar, Shield, Clock, Ban, CheckCircle, XCircle } from 'lucide-react'
@@ -57,67 +57,69 @@ export default function TarjetaUsuario({ usuario, onEditar, onEliminar, onCambia
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
+      <div className="p-4 md:p-6">
+        {/* Header: Avatar + Info + Acciones */}
+        <div className="flex items-start gap-3 md:gap-4 mb-4">
+          {/* Avatar */}
+          <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-lg md:text-xl flex-shrink-0">
+            {usuario.nombre_completo?.charAt(0).toUpperCase() || '?'}
+          </div>
+
           {/* Info principal */}
-          <div className="flex items-start gap-4 flex-1">
-            {/* Avatar */}
-            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-              {usuario.nombre_completo?.charAt(0).toUpperCase() || '?'}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2 truncate">
+              {usuario.nombre_completo}
+            </h3>
+            
+            {/* Badges - Con wrap para móvil */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              {/* Badge estado */}
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${estadoConfig.bg} ${estadoConfig.text} flex items-center gap-1`}>
+                <EstadoIcon className="w-3 h-3" />
+                {estadoConfig.label}
+              </span>
+
+              {/* Badge rol */}
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-${rolConfig.color}-100 dark:bg-${rolConfig.color}-900/30 text-${rolConfig.color}-700 dark:text-${rolConfig.color}-400`}>
+                {rolConfig.label}
+              </span>
+
+              {/* Badge no vigente */}
+              {!vigente && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                  Vencido
+                </span>
+              )}
             </div>
 
-            {/* Datos */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{usuario.nombre_completo}</h3>
-                
-                {/* Badge estado */}
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${estadoConfig.bg} ${estadoConfig.text} flex items-center gap-1`}>
-                  <EstadoIcon className="w-3 h-3" />
-                  {estadoConfig.label}
-                </span>
-
-                {/* Badge rol */}
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium bg-${rolConfig.color}-100 dark:bg-${rolConfig.color}-900/30 text-${rolConfig.color}-700 dark:text-${rolConfig.color}-400`}>
-                  {rolConfig.label}
-                </span>
-
-                {/* Badge no vigente */}
-                {!vigente && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
-                    Vencido
-                  </span>
-                )}
+            {/* Contacto - Stack en móvil */}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-gray-600 dark:text-gray-400">
+              {/* Email */}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Mail className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span className="truncate">{usuario.email}</span>
               </div>
 
-              <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
-                {/* Email */}
+              {/* Teléfono */}
+              {usuario.telefono && (
                 <div className="flex items-center gap-1.5">
-                  <Mail className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                  <span>{usuario.email}</span>
+                  <Phone className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                  <span>{usuario.telefono}</span>
                 </div>
+              )}
 
-                {/* Teléfono */}
-                {usuario.telefono && (
-                  <div className="flex items-center gap-1.5">
-                    <Phone className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                    <span>{usuario.telefono}</span>
-                  </div>
-                )}
-
-                {/* Número interno */}
-                {usuario.numero_interno && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-gray-400 dark:text-gray-500">#</span>
-                    <span>{usuario.numero_interno}</span>
-                  </div>
-                )}
-              </div>
+              {/* Número interno */}
+              {usuario.numero_interno && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-gray-400 dark:text-gray-500">#</span>
+                  <span>{usuario.numero_interno}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Acciones */}
-          <div className="flex items-center gap-2">
+          {/* Acciones - Desktop */}
+          <div className="hidden md:flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => onEditar(usuario)}
               className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
@@ -139,10 +141,10 @@ export default function TarjetaUsuario({ usuario, onEditar, onEliminar, onCambia
         </div>
 
         {/* Información adicional */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 space-y-3">
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-3 md:pt-4 space-y-2 md:space-y-3">
           {/* Vigencia */}
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+          <div className="flex items-center gap-2 text-xs md:text-sm">
+            <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
             <span className="text-gray-600 dark:text-gray-400">
               Vigente desde {formatearFecha(usuario.fecha_desde)}
               {usuario.fecha_hasta && ` hasta ${formatearFecha(usuario.fecha_hasta)}`}
@@ -151,8 +153,8 @@ export default function TarjetaUsuario({ usuario, onEditar, onEliminar, onCambia
 
           {/* Último acceso */}
           {usuario.ultimo_acceso && (
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <div className="flex items-center gap-2 text-xs md:text-sm">
+              <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
               <span className="text-gray-600 dark:text-gray-400">
                 Último acceso: {formatearFecha(usuario.ultimo_acceso)}
               </span>
@@ -161,9 +163,9 @@ export default function TarjetaUsuario({ usuario, onEditar, onEliminar, onCambia
 
           {/* Periodos asignados */}
           {usuario.periodos_asignados && usuario.periodos_asignados.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Periodos:</span>
-              <div className="flex gap-1.5">
+            <div className="flex items-start gap-2">
+              <span className="text-xs md:text-sm text-gray-600 dark:text-gray-400 font-medium flex-shrink-0 pt-0.5">Periodos:</span>
+              <div className="flex flex-wrap gap-1.5">
                 {usuario.periodos_asignados.map(periodo => (
                   <span
                     key={periodo.periodo_id}
@@ -178,32 +180,54 @@ export default function TarjetaUsuario({ usuario, onEditar, onEliminar, onCambia
           )}
 
           {/* Acciones rápidas de estado */}
-          {!esPropietario && usuario.estado !== 'activo' && (
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={() => onCambiarEstado('activo')}
-                className="px-3 py-1.5 text-sm bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
-              >
-                Activar
-              </button>
+          {!esPropietario && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {usuario.estado !== 'activo' && (
+                <button
+                  onClick={() => onCambiarEstado('activo')}
+                  className="px-3 py-1.5 text-sm bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors font-medium"
+                >
+                  Activar
+                </button>
+              )}
+
+              {usuario.estado === 'activo' && (
+                <>
+                  <button
+                    onClick={() => onCambiarEstado('inactivo')}
+                    className="px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors font-medium"
+                  >
+                    Desactivar
+                  </button>
+                  <button
+                    onClick={() => onCambiarEstado('suspendido')}
+                    className="px-3 py-1.5 text-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium"
+                  >
+                    Suspender
+                  </button>
+                </>
+              )}
             </div>
           )}
+        </div>
 
-          {!esPropietario && usuario.estado === 'activo' && (
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={() => onCambiarEstado('inactivo')}
-                className="px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-              >
-                Desactivar
-              </button>
-              <button
-                onClick={() => onCambiarEstado('suspendido')}
-                className="px-3 py-1.5 text-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-              >
-                Suspender
-              </button>
-            </div>
+        {/* Acciones - Móvil (solo aparece en < md) */}
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 pt-3 mt-3 flex gap-2">
+          <button
+            onClick={() => onEditar(usuario)}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            <Edit2 className="w-4 h-4" />
+            Editar
+          </button>
+
+          {!esPropietario && (
+            <button
+              onClick={() => onEliminar(usuario)}
+              className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           )}
         </div>
       </div>

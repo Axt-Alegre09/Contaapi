@@ -1,6 +1,6 @@
 /**
  * Modal Crear Usuario - ContaAPI v2
- * src/paginas/equipo/ModalCrearUsuario.jsx
+ * MOBILE-FIRST - Modal responsive optimizado
  */
 
 import { useState, useEffect } from 'react'
@@ -8,12 +8,12 @@ import { X, Eye, EyeOff, Copy, Check, RefreshCw } from 'lucide-react'
 import { usuariosServicio } from '../../servicios/usuariosServicio'
 
 const ROLES = [
-  { value: 'propietario', label: 'Propietario', descripcion: 'Control total del sistema' },
-  { value: 'administrador', label: 'Administrador', descripcion: 'Gestión completa de la empresa' },
-  { value: 'contador', label: 'Contador', descripcion: 'Gestión contable y fiscal' },
+  { value: 'propietario', label: 'Propietario', descripcion: 'Control total' },
+  { value: 'administrador', label: 'Administrador', descripcion: 'Gestión completa' },
+  { value: 'contador', label: 'Contador', descripcion: 'Gestión contable' },
   { value: 'asistente', label: 'Asistente', descripcion: 'Tareas operativas' },
   { value: 'auditor', label: 'Auditor', descripcion: 'Solo lectura' },
-  { value: 'invitado', label: 'Invitado', descripcion: 'Acceso limitado temporal' }
+  { value: 'invitado', label: 'Invitado', descripcion: 'Acceso limitado' }
 ]
 
 export default function ModalCrearUsuario({ isOpen, onClose, empresaId, onUsuarioCreado }) {
@@ -155,31 +155,31 @@ URL: ${window.location.origin}`
 
   if (!isOpen) return null
 
-  // Vista de credenciales generadas CON DARK MODE
+  // Vista de credenciales generadas
   if (credencialesGeneradas) {
     return (
       <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-          <div className="text-center mb-6">
-            <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-              <Check className="w-8 h-8 text-green-600 dark:text-green-400" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-4 md:p-6">
+          <div className="text-center mb-4 md:mb-6">
+            <div className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-3 md:mb-4">
+              <Check className="w-7 h-7 md:w-8 md:h-8 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Usuario creado exitosamente</h3>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Guarda estas credenciales, no se mostrarán de nuevo</p>
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Usuario creado exitosamente</h3>
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-2">Guarda estas credenciales</p>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4 space-y-3">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 md:p-4 mb-4 space-y-3">
             <div>
               <label className="text-xs text-gray-500 dark:text-gray-400 font-medium">Nombre</label>
-              <p className="text-gray-900 dark:text-white font-medium">{credencialesGeneradas.nombre}</p>
+              <p className="text-sm md:text-base text-gray-900 dark:text-white font-medium break-words">{credencialesGeneradas.nombre}</p>
             </div>
             <div>
               <label className="text-xs text-gray-500 dark:text-gray-400 font-medium">Email</label>
-              <p className="text-gray-900 dark:text-white font-mono">{credencialesGeneradas.email}</p>
+              <p className="text-sm md:text-base text-gray-900 dark:text-white font-mono break-all">{credencialesGeneradas.email}</p>
             </div>
             <div>
               <label className="text-xs text-gray-500 dark:text-gray-400 font-medium">Contraseña</label>
-              <p className="text-gray-900 dark:text-white font-mono text-lg">{credencialesGeneradas.password}</p>
+              <p className="text-base md:text-lg text-gray-900 dark:text-white font-mono break-all">{credencialesGeneradas.password}</p>
             </div>
           </div>
 
@@ -213,18 +213,18 @@ URL: ${window.location.origin}`
     )
   }
 
-  // Vista del formulario CON DARK MODE
+  // Vista del formulario
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full my-8">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Crear nuevo usuario</h3>
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Crear nuevo usuario</h3>
           <button onClick={handleCerrar} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 md:space-y-6">
           {/* Datos básicos */}
           <div className="space-y-4">
             <div>
@@ -235,7 +235,7 @@ URL: ${window.location.origin}`
                 type="text"
                 value={formData.nombreCompleto}
                 onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                className={`w-full px-4 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-base ${
                   errores.nombreCompleto ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
                 }`}
                 placeholder="Juan Pérez"
@@ -253,7 +253,7 @@ URL: ${window.location.origin}`
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                className={`w-full px-4 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-base ${
                   errores.email ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
                 }`}
                 placeholder="juan@ejemplo.com"
@@ -274,7 +274,7 @@ URL: ${window.location.origin}`
                   className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  Generar nueva
+                  <span className="hidden sm:inline">Generar nueva</span>
                 </button>
               </div>
               <div className="relative">
@@ -282,7 +282,7 @@ URL: ${window.location.origin}`
                   type={mostrarPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={`w-full px-4 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                  className={`w-full px-4 py-2.5 md:py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-base ${
                     errores.password ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
                   }`}
                 />
@@ -300,12 +300,12 @@ URL: ${window.location.origin}`
             </div>
           </div>
 
-          {/* Rol */}
+          {/* Rol - Grid 1 col móvil, 2 cols desktop */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Rol *
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {ROLES.map(rol => (
                 <label
                   key={rol.value}
@@ -332,12 +332,12 @@ URL: ${window.location.origin}`
             </div>
           </div>
 
-          {/* Periodos */}
+          {/* Periodos - Grid adaptativo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Periodos asignados (opcional)
             </label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {usuariosServicio.obtenerAniosDisponibles().map(anio => (
                 <label
                   key={anio}
@@ -359,8 +359,8 @@ URL: ${window.location.origin}`
             </div>
           </div>
 
-          {/* Vigencia */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Vigencia - Grid 1 col móvil, 2 cols desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Válido desde
@@ -369,7 +369,7 @@ URL: ${window.location.origin}`
                 type="date"
                 value={formData.fechaDesde}
                 onChange={(e) => setFormData({ ...formData, fechaDesde: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
               />
             </div>
             <div>
@@ -380,13 +380,13 @@ URL: ${window.location.origin}`
                 type="date"
                 value={formData.fechaHasta}
                 onChange={(e) => setFormData({ ...formData, fechaHasta: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
               />
             </div>
           </div>
 
-          {/* Botones */}
-          <div className="flex gap-3 pt-4">
+          {/* Botones - Stack en móvil */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="button"
               onClick={handleCerrar}
