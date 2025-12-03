@@ -32,7 +32,8 @@ export function LayoutPrincipal({ children }) {
   const location = useLocation()
   const navigate = useNavigate()
   
-  const [menuAbierto, setMenuAbierto] = useState(true)
+  // CAMBIO: iniciar cerrado en móvil, se maneja con translate
+  const [menuAbierto, setMenuAbierto] = useState(false)
   const [mostrarSelectorEmpresa, setMostrarSelectorEmpresa] = useState(false)
 
   const menuItems = [
@@ -89,44 +90,57 @@ export function LayoutPrincipal({ children }) {
       {/* Fondo con dark mode */}
       <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-slate-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 -z-10" />
 
-      {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 transition-all duration-300 ${
-        menuAbierto ? 'w-64' : 'w-20'
-      } bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-xl`}>
+      {/* NUEVO: Overlay para móvil cuando el menú está abierto */}
+      {menuAbierto && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMenuAbierto(false)}
+        />
+      )}
+
+      {/* Sidebar - RESPONSIVE */}
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        transition-transform duration-300 ease-in-out
+        ${menuAbierto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        w-64 lg:w-64
+        bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm 
+        border-r border-gray-200 dark:border-gray-700 
+        flex flex-col shadow-xl
+      `}>
         
         {/* Logo y toggle */}
         <div className="h-16 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4">
-          {menuAbierto && (
-            <div className="flex items-center gap-2">
-              <img 
-                src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo.jpg" 
-                alt="ContaAPI" 
-                className="w-8 h-8 rounded-lg"
-              />
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                ContaAPI
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <img 
+              src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo.jpg" 
+              alt="ContaAPI" 
+              className="w-8 h-8 rounded-lg object-contain"
+            />
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              ContaAPI
+            </span>
+          </div>
+          {/* Botón X solo visible en móvil */}
           <button
-            onClick={() => setMenuAbierto(!menuAbierto)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            onClick={() => setMenuAbierto(false)}
+            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
-            {menuAbierto ? <X className="w-5 h-5 dark:text-gray-300" /> : <Menu className="w-5 h-5 dark:text-gray-300" />}
+            <X className="w-5 h-5 dark:text-gray-300" />
           </button>
         </div>
 
         {/* Selector de empresa */}
-        {menuAbierto && empresaActual && (
+        {empresaActual && (
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setMostrarSelectorEmpresa(!mostrarSelectorEmpresa)}
               className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-800/30 dark:hover:to-purple-800/30 rounded-xl transition-all"
             >
-              <div className="flex items-center gap-3">
-                <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <div className="text-left min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                     {empresaActual.nombre}
                   </p>
                   {periodoActual && (
@@ -134,7 +148,7 @@ export function LayoutPrincipal({ children }) {
                   )}
                 </div>
               </div>
-              <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
             </button>
 
             {mostrarSelectorEmpresa && (
@@ -155,26 +169,23 @@ export function LayoutPrincipal({ children }) {
         <nav className="flex-1 overflow-y-auto p-4 space-y-6">
           {menuItems.map((seccion, idx) => (
             <div key={idx}>
-              {menuAbierto && (
-                <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 px-2">
-                  {seccion.titulo}
-                </h3>
-              )}
+              <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 px-2">
+                {seccion.titulo}
+              </h3>
               <div className="space-y-1">
                 {seccion.items.map((item) => (
                   <Link
                     key={item.ruta}
                     to={item.ruta}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                    onClick={() => setMenuAbierto(false)} // Cerrar menú al navegar en móvil
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                       estaActivo(item.ruta)
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-200 dark:shadow-blue-900'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
                   >
-                    <item.icono className={`w-5 h-5 ${!menuAbierto && 'mx-auto'}`} />
-                    {menuAbierto && (
-                      <span className="text-sm font-medium">{item.nombre}</span>
-                    )}
+                    <item.icono className="w-5 h-5" />
+                    <span className="text-sm font-medium">{item.nombre}</span>
                   </Link>
                 ))}
               </div>
@@ -187,44 +198,53 @@ export function LayoutPrincipal({ children }) {
           {/* Toggle Dark Mode */}
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             {isDark ? (
               <>
-                <Sun className={`w-5 h-5 ${!menuAbierto && 'mx-auto'}`} />
-                {menuAbierto && <span className="text-sm font-medium">Modo Claro</span>}
+                <Sun className="w-5 h-5" />
+                <span className="text-sm font-medium">Modo Claro</span>
               </>
             ) : (
               <>
-                <Moon className={`w-5 h-5 ${!menuAbierto && 'mx-auto'}`} />
-                {menuAbierto && <span className="text-sm font-medium">Modo Oscuro</span>}
+                <Moon className="w-5 h-5" />
+                <span className="text-sm font-medium">Modo Oscuro</span>
               </>
             )}
           </button>
 
           <Link
             to="/configuracion"
-            className="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
-            <Settings className={`w-5 h-5 ${!menuAbierto && 'mx-auto'}`} />
-            {menuAbierto && <span className="text-sm font-medium">Configuración</span>}
+            <Settings className="w-5 h-5" />
+            <span className="text-sm font-medium">Configuración</span>
           </Link>
           
           <button
             onClick={cerrarSesion}
-            className="w-full flex items-center gap-3 px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
           >
-            <LogOut className={`w-5 h-5 ${!menuAbierto && 'mx-auto'}`} />
-            {menuAbierto && <span className="text-sm font-medium">Cerrar sesión</span>}
+            <LogOut className="w-5 h-5" />
+            <span className="text-sm font-medium">Cerrar sesión</span>
           </button>
         </div>
       </aside>
 
-      {/* Contenido principal */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header */}
-        <header className="h-16 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 shadow-sm">
-          <div className="flex items-center gap-4 flex-1 max-w-2xl">
+      {/* Contenido principal - RESPONSIVE */}
+      <div className="flex-1 flex flex-col min-h-screen w-full lg:w-auto">
+        {/* Header - RESPONSIVE */}
+        <header className="h-16 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6 shadow-sm sticky top-0 z-30">
+          {/* Botón hamburguesa - SOLO EN MÓVIL */}
+          <button
+            onClick={() => setMenuAbierto(true)}
+            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <Menu className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+          </button>
+
+          {/* Buscador - Oculto en móvil pequeño */}
+          <div className="hidden sm:flex items-center gap-4 flex-1 max-w-2xl">
             <Search className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
@@ -233,18 +253,29 @@ export function LayoutPrincipal({ children }) {
             />
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Logo en móvil (centro) */}
+          <div className="lg:hidden flex-1 flex justify-center">
+            <img 
+              src="https://rsttvtsckdgjyobrqtlx.supabase.co/storage/v1/object/public/Contaapi/logo.jpg" 
+              alt="ContaAPI" 
+              className="w-8 h-8 rounded-lg object-contain"
+            />
+          </div>
+
+          {/* Acciones header */}
+          <div className="flex items-center gap-2 lg:gap-4">
             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg relative transition-colors">
               <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
             
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+            <button className="hidden sm:block p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
               <HelpCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
 
-            <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700">
-              <div className="text-right">
+            {/* Usuario info - Responsive */}
+            <div className="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-4 border-l border-gray-200 dark:border-gray-700">
+              <div className="hidden md:block text-right">
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {usuario?.user_metadata?.full_name || usuario?.email?.split('@')[0]}
                 </p>
@@ -257,8 +288,8 @@ export function LayoutPrincipal({ children }) {
           </div>
         </header>
 
-        {/* Área de contenido */}
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* Área de contenido - RESPONSIVE */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
           {children}
         </main>
       </div>
