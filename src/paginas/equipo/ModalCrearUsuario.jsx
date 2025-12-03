@@ -155,38 +155,38 @@ URL: ${window.location.origin}`
 
   if (!isOpen) return null
 
-  // Vista de credenciales generadas
+  // Vista de credenciales generadas CON DARK MODE
   if (credencialesGeneradas) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
           <div className="text-center mb-6">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <Check className="w-8 h-8 text-green-600" />
+            <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+              <Check className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">Usuario creado exitosamente</h3>
-            <p className="text-gray-600 mt-2">Guarda estas credenciales, no se mostrarán de nuevo</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Usuario creado exitosamente</h3>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Guarda estas credenciales, no se mostrarán de nuevo</p>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4 space-y-3">
             <div>
-              <label className="text-xs text-gray-500 font-medium">Nombre</label>
-              <p className="text-gray-900 font-medium">{credencialesGeneradas.nombre}</p>
+              <label className="text-xs text-gray-500 dark:text-gray-400 font-medium">Nombre</label>
+              <p className="text-gray-900 dark:text-white font-medium">{credencialesGeneradas.nombre}</p>
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium">Email</label>
-              <p className="text-gray-900 font-mono">{credencialesGeneradas.email}</p>
+              <label className="text-xs text-gray-500 dark:text-gray-400 font-medium">Email</label>
+              <p className="text-gray-900 dark:text-white font-mono">{credencialesGeneradas.email}</p>
             </div>
             <div>
-              <label className="text-xs text-gray-500 font-medium">Contraseña</label>
-              <p className="text-gray-900 font-mono text-lg">{credencialesGeneradas.password}</p>
+              <label className="text-xs text-gray-500 dark:text-gray-400 font-medium">Contraseña</label>
+              <p className="text-gray-900 dark:text-white font-mono text-lg">{credencialesGeneradas.password}</p>
             </div>
           </div>
 
           <div className="space-y-2">
             <button
               onClick={copiarCredenciales}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              className="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
               {passwordCopiada ? (
                 <>
@@ -203,7 +203,7 @@ URL: ${window.location.origin}`
 
             <button
               onClick={handleCerrar}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors"
+              className="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-3 px-4 rounded-lg transition-colors"
             >
               Cerrar
             </button>
@@ -213,13 +213,13 @@ URL: ${window.location.origin}`
     )
   }
 
-  // Vista del formulario
+  // Vista del formulario CON DARK MODE
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full my-8">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h3 className="text-xl font-bold text-gray-900">Crear nuevo usuario</h3>
-          <button onClick={handleCerrar} className="text-gray-400 hover:text-gray-600">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full my-8">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Crear nuevo usuario</h3>
+          <button onClick={handleCerrar} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -228,50 +228,50 @@ URL: ${window.location.origin}`
           {/* Datos básicos */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Nombre completo *
               </label>
               <input
                 type="text"
                 value={formData.nombreCompleto}
                 onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errores.nombreCompleto ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                  errores.nombreCompleto ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
                 }`}
                 placeholder="Juan Pérez"
               />
               {errores.nombreCompleto && (
-                <p className="text-red-500 text-sm mt-1">{errores.nombreCompleto}</p>
+                <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errores.nombreCompleto}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email *
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errores.email ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                  errores.email ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
                 }`}
                 placeholder="juan@ejemplo.com"
               />
               {errores.email && (
-                <p className="text-red-500 text-sm mt-1">{errores.email}</p>
+                <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errores.email}</p>
               )}
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Contraseña *
                 </label>
                 <button
                   type="button"
                   onClick={generarPasswordAutomatica}
-                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
                 >
                   <RefreshCw className="w-4 h-4" />
                   Generar nueva
@@ -282,27 +282,27 @@ URL: ${window.location.origin}`
                   type={mostrarPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={`w-full px-4 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono ${
-                    errores.password ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full px-4 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                    errores.password ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarPassword(!mostrarPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {mostrarPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               {errores.password && (
-                <p className="text-red-500 text-sm mt-1">{errores.password}</p>
+                <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errores.password}</p>
               )}
             </div>
           </div>
 
           {/* Rol */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Rol *
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -311,8 +311,8 @@ URL: ${window.location.origin}`
                   key={rol.value}
                   className={`relative flex items-start p-3 border-2 rounded-lg cursor-pointer transition-all ${
                     formData.rol === rol.value
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                   }`}
                 >
                   <input
@@ -324,8 +324,8 @@ URL: ${window.location.origin}`
                     className="sr-only"
                   />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{rol.label}</p>
-                    <p className="text-xs text-gray-500">{rol.descripcion}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{rol.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{rol.descripcion}</p>
                   </div>
                 </label>
               ))}
@@ -334,7 +334,7 @@ URL: ${window.location.origin}`
 
           {/* Periodos */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Periodos asignados (opcional)
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -343,8 +343,8 @@ URL: ${window.location.origin}`
                   key={anio}
                   className={`flex items-center justify-center p-2 border-2 rounded-lg cursor-pointer transition-all ${
                     formData.periodos.includes(anio)
-                      ? 'border-blue-600 bg-blue-50 text-blue-600'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-900 dark:text-white'
                   }`}
                 >
                   <input
@@ -362,25 +362,25 @@ URL: ${window.location.origin}`
           {/* Vigencia */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Válido desde
               </label>
               <input
                 type="date"
                 value={formData.fechaDesde}
                 onChange={(e) => setFormData({ ...formData, fechaDesde: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Válido hasta (opcional)
               </label>
               <input
                 type="date"
                 value={formData.fechaHasta}
                 onChange={(e) => setFormData({ ...formData, fechaHasta: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
           </div>
@@ -390,7 +390,7 @@ URL: ${window.location.origin}`
             <button
               type="button"
               onClick={handleCerrar}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               disabled={loading}
             >
               Cancelar
@@ -398,7 +398,7 @@ URL: ${window.location.origin}`
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+              className="flex-1 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
             >
               {loading ? 'Creando...' : 'Crear usuario'}
             </button>

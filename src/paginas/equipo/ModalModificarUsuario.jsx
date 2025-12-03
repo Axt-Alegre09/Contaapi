@@ -125,14 +125,14 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
   const esPropietario = usuario.rol === 'propietario'
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full my-8">
-        <div className="flex items-center justify-between p-6 border-b">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full my-8">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Modificar usuario</h3>
-            <p className="text-sm text-gray-500 mt-1">{usuario.email}</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Modificar usuario</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{usuario.email}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -140,12 +140,12 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Advertencia propietario */}
           {esPropietario && (
-            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
+            <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 dark:border-amber-400 p-4 rounded">
               <div className="flex gap-3">
-                <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-amber-900">Usuario propietario</p>
-                  <p className="text-sm text-amber-700 mt-1">
+                  <p className="text-sm font-medium text-amber-900 dark:text-amber-300">Usuario propietario</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
                     Algunos campos están bloqueados para proteger el acceso principal
                   </p>
                 </div>
@@ -156,27 +156,27 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
           {/* Datos básicos */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Nombre completo *
               </label>
               <input
                 type="text"
                 value={formData.nombreCompleto}
                 onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Teléfono
               </label>
               <input
                 type="tel"
                 value={formData.telefono}
                 onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                 placeholder="(595) 981-123456"
               />
             </div>
@@ -185,14 +185,14 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
           {/* Rol y Estado */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Rol *
               </label>
               <select
                 value={formData.rol}
                 onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
                 disabled={esPropietario}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 {ROLES.map(rol => (
                   <option key={rol.value} value={rol.value}>
@@ -203,14 +203,14 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Estado *
               </label>
               <select
                 value={formData.estado}
                 onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
                 disabled={esPropietario}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 {ESTADOS.map(estado => (
                   <option key={estado.value} value={estado.value}>
@@ -223,7 +223,7 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
 
           {/* Periodos */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Periodos asignados
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -232,8 +232,8 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
                   key={anio}
                   className={`flex items-center justify-center p-2 border-2 rounded-lg cursor-pointer transition-all ${
                     formData.periodos.includes(anio)
-                      ? 'border-blue-600 bg-blue-50 text-blue-600'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-900 dark:text-white'
                   }`}
                 >
                   <input
@@ -251,50 +251,50 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
           {/* Vigencia */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Válido desde
               </label>
               <input
                 type="date"
                 value={formData.fechaDesde}
                 onChange={(e) => setFormData({ ...formData, fechaDesde: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Válido hasta (opcional)
               </label>
               <input
                 type="date"
                 value={formData.fechaHasta}
                 onChange={(e) => setFormData({ ...formData, fechaHasta: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
           </div>
 
           {/* Cambiar contraseña */}
-          <div className="border-t pt-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
             {!mostrarCambiarPassword ? (
               <button
                 type="button"
                 onClick={() => setMostrarCambiarPassword(true)}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+                className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
               >
                 <Key className="w-5 h-5" />
                 Cambiar contraseña
               </button>
             ) : (
-              <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+              <div className="space-y-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 <div className="flex items-center justify-between">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Nueva contraseña
                   </label>
                   <button
                     type="button"
                     onClick={generarPasswordAleatoria}
-                    className="text-sm text-blue-600 hover:text-blue-700"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                   >
                     Generar aleatoria
                   </button>
@@ -303,7 +303,7 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
                   type="text"
                   value={nuevaPassword}
                   onChange={(e) => setNuevaPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-mono bg-white dark:bg-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Mínimo 8 caracteres"
                 />
                 <div className="flex gap-2">
@@ -311,7 +311,7 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
                     type="button"
                     onClick={handleCambiarPassword}
                     disabled={loading}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+                    className="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600"
                   >
                     Cambiar contraseña
                   </button>
@@ -321,7 +321,7 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
                       setMostrarCambiarPassword(false)
                       setNuevaPassword('')
                     }}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
                     Cancelar
                   </button>
@@ -335,7 +335,7 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50"
+              className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
               disabled={loading}
             >
               Cancelar
@@ -343,7 +343,7 @@ export default function ModalModificarUsuario({ isOpen, onClose, usuario, empres
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+              className="flex-1 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600"
             >
               {loading ? 'Guardando...' : 'Guardar cambios'}
             </button>
