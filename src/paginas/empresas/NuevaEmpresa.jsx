@@ -2,186 +2,217 @@
  * Nueva Empresa - ContaAPI v2
  * Formulario completo con notificaciones y periodos funcionando
  */
-
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { 
-  Building2, 
-  FileText, 
-  Settings, 
+import { crearPeriodosIniciales } from "../../utilidades/crearPeriodosIniciales";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Building2,
+  FileText,
+  Settings,
   Receipt,
   ArrowLeft,
   Save,
-  AlertCircle
-} from 'lucide-react'
-import { empresasServicio } from '../../servicios/empresasServicio'
-import { useNotificacion } from '../../componentes/Notificacion'
-import { supabase } from '../../configuracion/supabase'
+  AlertCircle,
+} from "lucide-react";
+import { empresasServicio } from "../../servicios/empresasServicio";
+import { useNotificacion } from "../../componentes/Notificacion";
+import { supabase } from "../../configuracion/supabase";
 
 const PESTAÑAS = [
-  { id: 'datos', label: 'Datos de la Empresa', icon: Building2 },
-  { id: 'configuracion', label: 'Configuración del Sistema', icon: Settings },
-  { id: 'obligaciones', label: 'Obligaciones Fiscales', icon: Receipt }
-]
+  { id: "datos", label: "Datos de la Empresa", icon: Building2 },
+  { id: "configuracion", label: "Configuración del Sistema", icon: Settings },
+  { id: "obligaciones", label: "Obligaciones Fiscales", icon: Receipt },
+];
 
 const TIPOS_CONTRIBUYENTE = [
-  { value: 'general', label: 'Contribuyente General' },
-  { value: 'simple', label: 'Régimen Simple' },
-  { value: 'resimple', label: 'Régimen ReSimple' },
-  { value: 'pequeño', label: 'Pequeño Contribuyente' }
-]
+  { value: "general", label: "Contribuyente General" },
+  { value: "simple", label: "Régimen Simple" },
+  { value: "resimple", label: "Régimen ReSimple" },
+  { value: "pequeño", label: "Pequeño Contribuyente" },
+];
 
 const MONEDAS = [
-  { value: 'PYG', label: 'Guaraníes (₲)' },
-  { value: 'USD', label: 'Dólares (US$)' },
-  { value: 'BRL', label: 'Reales (R$)' },
-  { value: 'ARS', label: 'Pesos Argentinos (AR$)' }
-]
+  { value: "PYG", label: "Guaraníes (₲)" },
+  { value: "USD", label: "Dólares (US$)" },
+  { value: "BRL", label: "Reales (R$)" },
+  { value: "ARS", label: "Pesos Argentinos (AR$)" },
+];
 
 export default function NuevaEmpresa() {
-  const navigate = useNavigate()
-  const { success, error, warning, NotificacionContainer } = useNotificacion()
-  
-  const [pestañaActiva, setPestañaActiva] = useState('datos')
-  const [loading, setLoading] = useState(false)
-  const [periodos, setPeriodos] = useState([])
-  const [errores, setErrores] = useState({})
-  const [cargandoPeriodos, setCargandoPeriodos] = useState(true)
+  const navigate = useNavigate();
+  const { success, error, warning, NotificacionContainer } = useNotificacion();
+
+  const [pestañaActiva, setPestañaActiva] = useState("datos");
+  const [loading, setLoading] = useState(false);
+  const [periodos, setPeriodos] = useState([]);
+  const [errores, setErrores] = useState({});
+  const [cargandoPeriodos, setCargandoPeriodos] = useState(true);
 
   const [formData, setFormData] = useState({
     // Datos básicos
-    nombreComercial: '',
-    razonSocial: '',
-    ruc: '',
-    direccion: '',
-    telefono: '',
-    email: '',
-    tipoContribuyente: 'general',
-    
+    nombreComercial: "",
+    razonSocial: "",
+    ruc: "",
+    direccion: "",
+    telefono: "",
+    email: "",
+    tipoContribuyente: "general",
+
     // Configuración del sistema
-    periodoFiscal: '',
-    monedaBase: 'PYG',
-    fechaDesde: new Date().toISOString().split('T')[0],
-    
+    periodoFiscal: "",
+    monedaBase: "PYG",
+    fechaDesde: new Date().toISOString().split("T")[0],
+
     // Obligaciones fiscales
     contribuyenteIRP: false,
-    tipoIRP: '',
+    tipoIRP: "",
     esExportador: false,
     tieneIVA: true,
     tieneIRE: false,
     tieneIDU: false,
-    tieneINR: false
-  })
+    tieneINR: false,
+  });
 
   useEffect(() => {
-    cargarPeriodos()
-  }, [])
+    cargarPeriodos();
+  }, []);
 
   const cargarPeriodos = async () => {
-    setCargandoPeriodos(true)
+    setCargandoPeriodos(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        error('No hay usuario autenticado')
-        return
+        error("No hay usuario autenticado");
+        return;
       }
 
       const { data, error: errorPeriodos } = await supabase
-        .from('periodos_fiscales')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('año', { ascending: false })
+        .from("periodos_fiscales")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("anio", { ascending: false });
 
-      if (errorPeriodos) throw errorPeriodos
-      
+      if (errorPeriodos) throw errorPeriodos;
+
+      // Si no hay periodos, crearlos automáticamente
       if (!data || data.length === 0) {
-        warning('No tienes periodos fiscales creados. Por favor crea uno primero.')
-        setPeriodos([])
-        return
+        warning("No tienes periodos fiscales. Creándolos automáticamente...");
+        try {
+          const creados = await crearPeriodosIniciales();
+
+          if (creados) {
+            // Volver a cargar después de crear
+            const { data: nuevosData, error: errorNuevos } = await supabase
+              .from("periodos_fiscales")
+              .select("*")
+              .eq("user_id", user.id)
+              .order("anio", { ascending: false });
+
+            if (errorNuevos) throw errorNuevos;
+
+            setPeriodos(nuevosData || []);
+            if (nuevosData && nuevosData.length > 0) {
+              setFormData((prev) => ({
+                ...prev,
+                periodoFiscal: nuevosData[0].id,
+              }));
+              success("Periodos fiscales creados exitosamente");
+            }
+          }
+        } catch (err) {
+          error("Error al crear periodos automáticamente");
+          console.error("Error creando periodos:", err);
+        }
+        return;
       }
 
-      setPeriodos(data)
-      
+      // Si hay periodos, establecerlos
+      setPeriodos(data);
+
       // Seleccionar el periodo más reciente por defecto
-      setFormData(prev => ({ ...prev, periodoFiscal: data[0].id }))
+      if (data.length > 0) {
+        setFormData((prev) => ({ ...prev, periodoFiscal: data[0].id }));
+      }
     } catch (err) {
-      error('Error al cargar periodos fiscales')
-      console.error('Error al cargar periodos:', err)
+      error("Error al cargar periodos fiscales");
+      console.error("Error al cargar periodos:", err);
     } finally {
-      setCargandoPeriodos(false)
+      setCargandoPeriodos(false);
     }
-  }
+  };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setFormData(prev => ({
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
-    
+      [name]: type === "checkbox" ? checked : value,
+    }));
+
     // Limpiar error del campo
     if (errores[name]) {
-      setErrores(prev => ({ ...prev, [name]: null }))
+      setErrores((prev) => ({ ...prev, [name]: null }));
     }
-  }
+  };
 
   const validarFormulario = () => {
-    const nuevosErrores = {}
+    const nuevosErrores = {};
 
     // Validaciones pestaña Datos
     if (!formData.nombreComercial.trim()) {
-      nuevosErrores.nombreComercial = 'El nombre comercial es requerido'
+      nuevosErrores.nombreComercial = "El nombre comercial es requerido";
     }
     if (!formData.razonSocial.trim()) {
-      nuevosErrores.razonSocial = 'La razón social es requerida'
+      nuevosErrores.razonSocial = "La razón social es requerida";
     }
     if (!formData.ruc.trim()) {
-      nuevosErrores.ruc = 'El RUC es requerido'
+      nuevosErrores.ruc = "El RUC es requerido";
     } else if (!/^\d{7,8}-\d{1}$/.test(formData.ruc)) {
-      nuevosErrores.ruc = 'Formato de RUC inválido (ejemplo: 80012345-6)'
+      nuevosErrores.ruc = "Formato de RUC inválido (ejemplo: 80012345-6)";
     }
 
     // Validaciones pestaña Configuración
     if (!formData.periodoFiscal) {
-      nuevosErrores.periodoFiscal = 'Debes seleccionar un periodo fiscal'
+      nuevosErrores.periodoFiscal = "Debes seleccionar un periodo fiscal";
     }
 
     // Validaciones pestaña Obligaciones
     if (formData.contribuyenteIRP && !formData.tipoIRP) {
-      nuevosErrores.tipoIRP = 'Debes seleccionar un tipo de IRP'
+      nuevosErrores.tipoIRP = "Debes seleccionar un tipo de IRP";
     }
 
-    setErrores(nuevosErrores)
-    return Object.keys(nuevosErrores).length === 0
-  }
+    setErrores(nuevosErrores);
+    return Object.keys(nuevosErrores).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validarFormulario()) {
-      error('Por favor completa todos los campos requeridos')
-      return
+      error("Por favor completa todos los campos requeridos");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      await empresasServicio.crearEmpresa(formData)
-      success('¡Empresa creada exitosamente!')
-      
+      await empresasServicio.crearEmpresa(formData);
+      success("¡Empresa creada exitosamente!");
+
       // Esperar un momento para que se vea la notificación
       setTimeout(() => {
-        navigate('/empresas')
-      }, 1500)
+        navigate("/empresas");
+      }, 1500);
     } catch (err) {
-      error(err.message || 'Error al crear la empresa')
+      error(err.message || "Error al crear la empresa");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const renderPestaña = () => {
     switch (pestañaActiva) {
-      case 'datos':
+      case "datos":
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
@@ -196,14 +227,16 @@ export default function NuevaEmpresa() {
                   value={formData.nombreComercial}
                   onChange={handleChange}
                   className={`w-full px-4 py-2 border ${
-                    errores.nombreComercial 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-gray-300 dark:border-gray-600'
+                    errores.nombreComercial
+                      ? "border-red-500 dark:border-red-400"
+                      : "border-gray-300 dark:border-gray-600"
                   } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                   placeholder="Ej: Distribuidora del Este"
                 />
                 {errores.nombreComercial && (
-                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errores.nombreComercial}</p>
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+                    {errores.nombreComercial}
+                  </p>
                 )}
               </div>
 
@@ -218,14 +251,16 @@ export default function NuevaEmpresa() {
                   value={formData.razonSocial}
                   onChange={handleChange}
                   className={`w-full px-4 py-2 border ${
-                    errores.razonSocial 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-gray-300 dark:border-gray-600'
+                    errores.razonSocial
+                      ? "border-red-500 dark:border-red-400"
+                      : "border-gray-300 dark:border-gray-600"
                   } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                   placeholder="Ej: Distribuidora del Este S.A."
                 />
                 {errores.razonSocial && (
-                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errores.razonSocial}</p>
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+                    {errores.razonSocial}
+                  </p>
                 )}
               </div>
 
@@ -240,14 +275,16 @@ export default function NuevaEmpresa() {
                   value={formData.ruc}
                   onChange={handleChange}
                   className={`w-full px-4 py-2 border ${
-                    errores.ruc 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-gray-300 dark:border-gray-600'
+                    errores.ruc
+                      ? "border-red-500 dark:border-red-400"
+                      : "border-gray-300 dark:border-gray-600"
                   } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                   placeholder="80012345-6"
                 />
                 {errores.ruc && (
-                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errores.ruc}</p>
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+                    {errores.ruc}
+                  </p>
                 )}
               </div>
 
@@ -262,7 +299,7 @@ export default function NuevaEmpresa() {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
-                  {TIPOS_CONTRIBUYENTE.map(tipo => (
+                  {TIPOS_CONTRIBUYENTE.map((tipo) => (
                     <option key={tipo.value} value={tipo.value}>
                       {tipo.label}
                     </option>
@@ -316,9 +353,9 @@ export default function NuevaEmpresa() {
               </div>
             </div>
           </div>
-        )
+        );
 
-      case 'configuracion':
+      case "configuracion":
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
@@ -341,21 +378,24 @@ export default function NuevaEmpresa() {
                     value={formData.periodoFiscal}
                     onChange={handleChange}
                     className={`w-full px-4 py-2 border ${
-                      errores.periodoFiscal 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      errores.periodoFiscal
+                        ? "border-red-500 dark:border-red-400"
+                        : "border-gray-300 dark:border-gray-600"
                     } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                   >
                     <option value="">Seleccionar periodo</option>
-                    {periodos.map(periodo => (
+                    {periodos.map((periodo) => (
                       <option key={periodo.id} value={periodo.id}>
-                        {periodo.nombre} ({periodo.fecha_desde} - {periodo.fecha_hasta})
+                        {periodo.nombre} ({periodo.fecha_desde} -{" "}
+                        {periodo.fecha_hasta})
                       </option>
                     ))}
                   </select>
                 )}
                 {errores.periodoFiscal && (
-                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errores.periodoFiscal}</p>
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+                    {errores.periodoFiscal}
+                  </p>
                 )}
               </div>
 
@@ -370,7 +410,7 @@ export default function NuevaEmpresa() {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
-                  {MONEDAS.map(moneda => (
+                  {MONEDAS.map((moneda) => (
                     <option key={moneda.value} value={moneda.value}>
                       {moneda.label}
                     </option>
@@ -402,16 +442,17 @@ export default function NuevaEmpresa() {
                     Configuración del Sistema
                   </h4>
                   <p className="text-sm text-blue-700 dark:text-blue-400">
-                    Esta empresa será vinculada al periodo fiscal seleccionado. Podrás gestionar 
-                    múltiples periodos desde la configuración de la empresa.
+                    Esta empresa será vinculada al periodo fiscal seleccionado.
+                    Podrás gestionar múltiples periodos desde la configuración
+                    de la empresa.
                   </p>
                 </div>
               </div>
             </div>
           </div>
-        )
+        );
 
-      case 'obligaciones':
+      case "obligaciones":
         return (
           <div className="space-y-6">
             {/* Contribuyente de IRP */}
@@ -445,37 +486,45 @@ export default function NuevaEmpresa() {
                         type="radio"
                         name="tipoIRP"
                         value="servicios"
-                        checked={formData.tipoIRP === 'servicios'}
+                        checked={formData.tipoIRP === "servicios"}
                         onChange={handleChange}
                         className="w-4 h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
-                      <span className="text-sm text-gray-900 dark:text-white">Prestador de Servicios</span>
+                      <span className="text-sm text-gray-900 dark:text-white">
+                        Prestador de Servicios
+                      </span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input
                         type="radio"
                         name="tipoIRP"
                         value="dependencia"
-                        checked={formData.tipoIRP === 'dependencia'}
+                        checked={formData.tipoIRP === "dependencia"}
                         onChange={handleChange}
                         className="w-4 h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
-                      <span className="text-sm text-gray-900 dark:text-white">En relación de dependencia</span>
+                      <span className="text-sm text-gray-900 dark:text-white">
+                        En relación de dependencia
+                      </span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input
                         type="radio"
                         name="tipoIRP"
                         value="rentas"
-                        checked={formData.tipoIRP === 'rentas'}
+                        checked={formData.tipoIRP === "rentas"}
                         onChange={handleChange}
                         className="w-4 h-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
-                      <span className="text-sm text-gray-900 dark:text-white">Rentas y Ganancias de Capital</span>
+                      <span className="text-sm text-gray-900 dark:text-white">
+                        Rentas y Ganancias de Capital
+                      </span>
                     </label>
                   </div>
                   {errores.tipoIRP && (
-                    <p className="mt-2 text-sm text-red-500 dark:text-red-400">{errores.tipoIRP}</p>
+                    <p className="mt-2 text-sm text-red-500 dark:text-red-400">
+                      {errores.tipoIRP}
+                    </p>
                   )}
                 </div>
               )}
@@ -499,7 +548,9 @@ export default function NuevaEmpresa() {
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       I.V.A. (Impuesto al Valor Agregado)
                     </span>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">General</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      General
+                    </p>
                   </div>
                 </label>
 
@@ -512,8 +563,12 @@ export default function NuevaEmpresa() {
                     className="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">I.R.E.</span>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Simple</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      I.R.E.
+                    </span>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      Simple
+                    </p>
                   </div>
                 </label>
 
@@ -526,8 +581,12 @@ export default function NuevaEmpresa() {
                     className="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">I.D.U.</span>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">ReSimple</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      I.D.U.
+                    </span>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      ReSimple
+                    </p>
                   </div>
                 </label>
 
@@ -569,24 +628,24 @@ export default function NuevaEmpresa() {
               </label>
             </div>
           </div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <>
       <NotificacionContainer />
-      
+
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate('/empresas')}
+                onClick={() => navigate("/empresas")}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -595,8 +654,12 @@ export default function NuevaEmpresa() {
                 <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Nueva Empresa</h1>
-                <p className="text-gray-600 dark:text-gray-400">Completa los datos para crear una nueva empresa</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Nueva Empresa
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Completa los datos para crear una nueva empresa
+                </p>
               </div>
             </div>
           </div>
@@ -608,36 +671,34 @@ export default function NuevaEmpresa() {
           <div className="border-b border-gray-200 dark:border-gray-700">
             <div className="flex">
               {PESTAÑAS.map((pestaña) => {
-                const Icon = pestaña.icon
+                const Icon = pestaña.icon;
                 return (
                   <button
                     key={pestaña.id}
                     onClick={() => setPestañaActiva(pestaña.id)}
                     className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
                       pestañaActiva === pestaña.id
-                        ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="hidden lg:inline">{pestaña.label}</span>
                   </button>
-                )
+                );
               })}
             </div>
           </div>
 
           {/* Contenido de la pestaña */}
           <form onSubmit={handleSubmit}>
-            <div className="p-6">
-              {renderPestaña()}
-            </div>
+            <div className="p-6">{renderPestaña()}</div>
 
             {/* Botones de acción */}
             <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-700 flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => navigate('/empresas')}
+                onClick={() => navigate("/empresas")}
                 disabled={loading}
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
               >
@@ -649,12 +710,12 @@ export default function NuevaEmpresa() {
                 className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
                 <Save className="w-5 h-5" />
-                {loading ? 'Creando...' : 'Crear Empresa'}
+                {loading ? "Creando..." : "Crear Empresa"}
               </button>
             </div>
           </form>
         </div>
       </div>
     </>
-  )
+  );
 }
