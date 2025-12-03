@@ -97,30 +97,40 @@ export function Dashboard() {
   return (
     <div className="min-h-screen">
       <div className="space-y-6">
-        {/* Encabezado con fondo blanco semi-transparente */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
+        {/* Encabezado CON DARK MODE */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">Bienvenido de vuelta, aquí está tu resumen</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Bienvenido de vuelta, aquí está tu resumen</p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <Calendar className="w-4 h-4" />
               <span>Período: Enero 2024 - Diciembre 2024</span>
             </div>
           </div>
         </div>
 
-        {/* Estadísticas principales */}
+        {/* Estadísticas principales CON DARK MODE */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {estadisticas.map((stat, idx) => (
-            <div key={idx} className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all">
+            <div key={idx} className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-all">
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg bg-${stat.color}-50`}>
-                  <stat.icono className={`w-6 h-6 text-${stat.color}-600`} />
+                <div className={`p-3 rounded-lg ${
+                  stat.color === 'green' ? 'bg-green-50 dark:bg-green-900/30' :
+                  stat.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/30' :
+                  stat.color === 'purple' ? 'bg-purple-50 dark:bg-purple-900/30' :
+                  'bg-orange-50 dark:bg-orange-900/30'
+                }`}>
+                  <stat.icono className={`w-6 h-6 ${
+                    stat.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                    stat.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                    stat.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                    'text-orange-600 dark:text-orange-400'
+                  }`} />
                 </div>
                 <div className={`flex items-center gap-1 text-sm font-medium ${
-                  stat.tipo === 'incremento' ? 'text-green-600' : 'text-red-600'
+                  stat.tipo === 'incremento' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                 }`}>
                   {stat.tipo === 'incremento' ? (
                     <TrendingUp className="w-4 h-4" />
@@ -130,28 +140,28 @@ export function Dashboard() {
                   {stat.cambio}
                 </div>
               </div>
-              <h3 className="text-sm text-gray-600 mb-1">{stat.titulo}</h3>
-              <p className="text-2xl font-bold text-gray-900">{stat.valor}</p>
+              <h3 className="text-sm text-gray-600 dark:text-gray-400 mb-1">{stat.titulo}</h3>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.valor}</p>
             </div>
           ))}
         </div>
 
-        {/* Acciones rápidas */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
+        {/* Acciones rápidas CON DARK MODE */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Acciones Rápidas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {accionesRapidas.map((accion, idx) => (
               <Link
                 key={idx}
                 to={accion.ruta}
-                className="group bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all hover:scale-105"
+                className="group bg-white dark:bg-gray-700 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 p-6 hover:shadow-md transition-all hover:scale-105"
               >
                 <div className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${accion.color} mb-4`}>
                   <accion.icono className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">{accion.titulo}</h3>
-                <p className="text-sm text-gray-600">{accion.descripcion}</p>
-                <div className="flex items-center gap-2 mt-4 text-blue-600 font-medium text-sm group-hover:gap-3 transition-all">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{accion.titulo}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{accion.descripcion}</p>
+                <div className="flex items-center gap-2 mt-4 text-blue-600 dark:text-blue-400 font-medium text-sm group-hover:gap-3 transition-all">
                   <span>Ir</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -161,38 +171,39 @@ export function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Actividad reciente */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-6">
+          {/* Actividad reciente CON DARK MODE */}
+          <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Actividad Reciente</h2>
-              <Link to="/actividad" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Actividad Reciente</h2>
+              <Link to="/actividad" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
                 Ver todo
               </Link>
             </div>
             <div className="space-y-4">
               {actividadReciente.map((actividad, idx) => (
-                <div key={idx} className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">
+                <div key={idx} className="flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
                   <div className={`p-2 rounded-lg ${
-                    actividad.tipo === 'asiento' ? 'bg-blue-100' :
-                    actividad.tipo === 'venta' ? 'bg-green-100' : 'bg-purple-100'
+                    actividad.tipo === 'asiento' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                    actividad.tipo === 'venta' ? 'bg-green-100 dark:bg-green-900/30' : 
+                    'bg-purple-100 dark:bg-purple-900/30'
                   }`}>
-                    {actividad.tipo === 'asiento' && <FileText className="w-5 h-5 text-blue-600" />}
-                    {actividad.tipo === 'venta' && <ShoppingBag className="w-5 h-5 text-green-600" />}
-                    {actividad.tipo === 'compra' && <ShoppingCart className="w-5 h-5 text-purple-600" />}
+                    {actividad.tipo === 'asiento' && <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+                    {actividad.tipo === 'venta' && <ShoppingBag className="w-5 h-5 text-green-600 dark:text-green-400" />}
+                    {actividad.tipo === 'compra' && <ShoppingCart className="w-5 h-5 text-purple-600 dark:text-purple-400" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {actividad.descripcion}
                       </p>
-                      <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap">
                         {actividad.monto}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <p className="text-xs text-gray-500">{actividad.numero}</p>
-                      <span className="text-xs text-gray-400">•</span>
-                      <p className="text-xs text-gray-500">{actividad.fecha}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{actividad.numero}</p>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{actividad.fecha}</p>
                     </div>
                   </div>
                 </div>
@@ -200,33 +211,33 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Tareas pendientes */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-6">
+          {/* Tareas pendientes CON DARK MODE */}
+          <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Tareas Pendientes</h2>
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <Plus className="w-5 h-5 text-gray-600" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Tareas Pendientes</h2>
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <Plus className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
             <div className="space-y-3">
               {tareasPendientes.map((tarea, idx) => (
-                <div key={idx} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer bg-white">
+                <div key={idx} className="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 transition-colors cursor-pointer bg-white dark:bg-gray-700">
                   <input 
                     type="checkbox" 
-                    className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-600"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{tarea.titulo}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{tarea.titulo}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        tarea.urgencia === 'alta' ? 'bg-red-100 text-red-700' :
-                        tarea.urgencia === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-gray-100 text-gray-700'
+                        tarea.urgencia === 'alta' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
+                        tarea.urgencia === 'media' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                        'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
                       }`}>
                         {tarea.urgencia === 'alta' && <AlertCircle className="w-3 h-3" />}
                         {tarea.urgencia.charAt(0).toUpperCase() + tarea.urgencia.slice(1)}
                       </span>
-                      <span className="text-xs text-gray-500">{tarea.fecha}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{tarea.fecha}</span>
                     </div>
                   </div>
                 </div>
