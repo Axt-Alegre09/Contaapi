@@ -1,6 +1,6 @@
 /**
  * Nueva Empresa - ContaAPI v2
- * Formulario completo para crear empresas con pestañas
+ * Formulario completo con notificaciones y periodos funcionando
  */
 
 import { useState, useEffect } from 'react'
@@ -15,6 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { empresasServicio } from '../../servicios/empresasServicio'
+import { useNotificacion } from '../../componentes/Notificacion'
 import { supabase } from '../../configuracion/supabase'
 
 const PESTAÑAS = [
@@ -39,10 +40,13 @@ const MONEDAS = [
 
 export default function NuevaEmpresa() {
   const navigate = useNavigate()
+  const { success, error, warning, NotificacionContainer } = useNotificacion()
+  
   const [pestañaActiva, setPestañaActiva] = useState('datos')
   const [loading, setLoading] = useState(false)
   const [periodos, setPeriodos] = useState([])
   const [errores, setErrores] = useState({})
+  const [cargandoPeriodos, setCargandoPeriodos] = useState(true)
 
   const [formData, setFormData] = useState({
     // Datos básicos
@@ -74,25 +78,37 @@ export default function NuevaEmpresa() {
   }, [])
 
   const cargarPeriodos = async () => {
+    setCargandoPeriodos(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        error('No hay usuario autenticado')
+        return
+      }
 
-      const { data, error } = await supabase
+      const { data, error: errorPeriodos } = await supabase
         .from('periodos_fiscales')
         .select('*')
         .eq('user_id', user.id)
         .order('año', { ascending: false })
 
-      if (error) throw error
-      setPeriodos(data || [])
+      if (errorPeriodos) throw errorPeriodos
+      
+      if (!data || data.length === 0) {
+        warning('No tienes periodos fiscales creados. Por favor crea uno primero.')
+        setPeriodos([])
+        return
+      }
+
+      setPeriodos(data)
       
       // Seleccionar el periodo más reciente por defecto
-      if (data && data.length > 0) {
-        setFormData(prev => ({ ...prev, periodoFiscal: data[0].id }))
-      }
-    } catch (error) {
-      console.error('Error al cargar periodos:', error)
+      setFormData(prev => ({ ...prev, periodoFiscal: data[0].id }))
+    } catch (err) {
+      error('Error al cargar periodos fiscales')
+      console.error('Error al cargar periodos:', err)
+    } finally {
+      setCargandoPeriodos(false)
     }
   }
 
@@ -143,17 +159,21 @@ export default function NuevaEmpresa() {
     e.preventDefault()
 
     if (!validarFormulario()) {
-      alert('Por favor completa todos los campos requeridos')
+      error('Por favor completa todos los campos requeridos')
       return
     }
 
     setLoading(true)
     try {
       await empresasServicio.crearEmpresa(formData)
-      alert('¡Empresa creada exitosamente!')
-      navigate('/empresas')
-    } catch (error) {
-      alert(error.message || 'Error al crear la empresa')
+      success('¡Empresa creada exitosamente!')
+      
+      // Esperar un momento para que se vea la notificación
+      setTimeout(() => {
+        navigate('/empresas')
+      }, 1500)
+    } catch (err) {
+      error(err.message || 'Error al crear la empresa')
     } finally {
       setLoading(false)
     }
@@ -307,23 +327,33 @@ export default function NuevaEmpresa() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Periodo Fiscal *
                 </label>
-                <select
-                  name="periodoFiscal"
-                  value={formData.periodoFiscal}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errores.periodoFiscal 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-gray-300 dark:border-gray-600'
-                  } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-                >
-                  <option value="">Seleccionar periodo</option>
-                  {periodos.map(periodo => (
-                    <option key={periodo.id} value={periodo.id}>
-                      {periodo.nombre} ({periodo.fecha_desde} - {periodo.fecha_hasta})
-                    </option>
-                  ))}
-                </select>
+                {cargandoPeriodos ? (
+                  <div className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                    Cargando periodos...
+                  </div>
+                ) : periodos.length === 0 ? (
+                  <div className="w-full px-4 py-2 border border-amber-300 dark:border-amber-600 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+                    No hay periodos disponibles
+                  </div>
+                ) : (
+                  <select
+                    name="periodoFiscal"
+                    value={formData.periodoFiscal}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-2 border ${
+                      errores.periodoFiscal 
+                        ? 'border-red-500 dark:border-red-400' 
+                        : 'border-gray-300 dark:border-gray-600'
+                    } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                  >
+                    <option value="">Seleccionar periodo</option>
+                    {periodos.map(periodo => (
+                      <option key={periodo.id} value={periodo.id}>
+                        {periodo.nombre} ({periodo.fecha_desde} - {periodo.fecha_hasta})
+                      </option>
+                    ))}
+                  </select>
+                )}
                 {errores.periodoFiscal && (
                   <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errores.periodoFiscal}</p>
                 )}
@@ -547,79 +577,84 @@ export default function NuevaEmpresa() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/empresas')}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-            </button>
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Nueva Empresa</h1>
-              <p className="text-gray-600 dark:text-gray-400">Completa los datos para crear una nueva empresa</p>
+    <>
+      <NotificacionContainer />
+      
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/empresas')}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Nueva Empresa</h1>
+                <p className="text-gray-600 dark:text-gray-400">Completa los datos para crear una nueva empresa</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Formulario con pestañas */}
-      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
-        {/* Pestañas */}
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex">
-            {PESTAÑAS.map((pestaña) => {
-              const Icon = pestaña.icon
-              return (
-                <button
-                  key={pestaña.id}
-                  onClick={() => setPestañaActiva(pestaña.id)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
-                    pestañaActiva === pestaña.id
-                      ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="hidden lg:inline">{pestaña.label}</span>
-                </button>
-              )
-            })}
+        {/* Formulario con pestañas */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
+          {/* Pestañas */}
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <div className="flex">
+              {PESTAÑAS.map((pestaña) => {
+                const Icon = pestaña.icon
+                return (
+                  <button
+                    key={pestaña.id}
+                    onClick={() => setPestañaActiva(pestaña.id)}
+                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
+                      pestañaActiva === pestaña.id
+                        ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="hidden lg:inline">{pestaña.label}</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
+
+          {/* Contenido de la pestaña */}
+          <form onSubmit={handleSubmit}>
+            <div className="p-6">
+              {renderPestaña()}
+            </div>
+
+            {/* Botones de acción */}
+            <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-700 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/empresas')}
+                disabled={loading}
+                className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading || periodos.length === 0}
+                className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+              >
+                <Save className="w-5 h-5" />
+                {loading ? 'Creando...' : 'Crear Empresa'}
+              </button>
+            </div>
+          </form>
         </div>
-
-        {/* Contenido de la pestaña */}
-        <form onSubmit={handleSubmit}>
-          <div className="p-6">
-            {renderPestaña()}
-          </div>
-
-          {/* Botones de acción */}
-          <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-700 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => navigate('/empresas')}
-              className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
-            >
-              <Save className="w-5 h-5" />
-              {loading ? 'Creando...' : 'Crear Empresa'}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
+    </>
   )
 }
