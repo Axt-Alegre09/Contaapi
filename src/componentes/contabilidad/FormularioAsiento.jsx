@@ -7,14 +7,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAsientos } from '../../hooks/useAsientos';
-import { useAuth } from '../../hooks/useAutenticacion';
+import { useAutenticacion } from '../../hooks/useAutenticacion';
 import SelectorPeriodo from './SelectorPeriodo';
 import LineaDetalle from './LineaDetalle';
 
 export default function FormularioAsiento({ asientoId = null, modo = 'crear' }) {
   const navigate = useNavigate();
   const { crear, modificar, validar, confirmar, loading, error } = useAsientos();
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacion();
 
   // Estado del formulario
   const [periodoId, setPeriodoId] = useState(null);

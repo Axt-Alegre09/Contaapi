@@ -7,13 +7,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAsientos } from '../../hooks/useAsientos';
-import { useAuth } from '../../hooks/useAutenticacion';
+import { useAutenticacion } from '../../hooks/useAutenticacion';
 
 export default function DetalleAsiento() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { obtenerPorId, confirmar, anular, loading } = useAsientos();
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacion();
 
   const [asiento, setAsiento] = useState(null);
   const [mostrarModalAnular, setMostrarModalAnular] = useState(false);

@@ -8,13 +8,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAsientos } from '../../hooks/useAsientos';
 import { usePeriodos } from '../../hooks/usePeriodos';
-import { useAuth } from '../../hooks/useAutenticacion';
+import { useAutenticacion } from '../../hooks/useAutenticacion';
 
 export default function ListaAsientos() {
   const navigate = useNavigate();
   const { asientos, listar, anular, eliminar, loading } = useAsientos();
   const { periodoActivo, periodos, listar: listarPeriodos } = usePeriodos();
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacion();
 
   // Estados de filtros
   const [filtros, setFiltros] = useState({
