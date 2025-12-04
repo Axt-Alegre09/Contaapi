@@ -18,12 +18,22 @@ import GestionEquipo from './paginas/equipo/GestionEquipo'
 import PaginaAuditoria from './paginas/equipo/PaginaAuditoria'
 import PaginaMetricas from './paginas/equipo/PaginaMetricas'
 
-// ========== NUEVOS IMPORTS DE EMPRESAS ==========
+// ========== IMPORTS DE EMPRESAS ==========
 import ListaEmpresas from './paginas/empresas/ListaEmpresas'
 import NuevaEmpresa from './paginas/empresas/NuevaEmpresa'
 import EditarEmpresa from './paginas/empresas/EditarEmpresa'
 import DetalleEmpresa from './paginas/empresas/DetalleEmpresa'
-// ================================================
+// ==========================================
+
+// ========== IMPORTS DE CONTABILIDAD ==========
+import Asientos from './paginas/contabilidad/Asientos'
+import NuevoAsiento from './paginas/contabilidad/NuevoAsiento'
+import DetalleAsiento from './paginas/contabilidad/DetalleAsiento'
+import LibroDiario from './paginas/contabilidad/LibroDiario'
+import LibroMayor from './paginas/contabilidad/LibroMayor'
+import Balances from './paginas/contabilidad/Balances'
+import PlanCuentas from './paginas/contabilidad/PlanCuentas'
+// =============================================
 
 function App() {
   const { usuario, cargando } = useAutenticacion()
@@ -107,7 +117,7 @@ function App() {
               } 
             />
 
-            {/* ========== NUEVAS RUTAS DE EMPRESAS ========== */}
+            {/* ========== RUTAS DE EMPRESAS ========== */}
             <Route 
               path="/empresas" 
               element={
@@ -167,9 +177,9 @@ function App() {
                 )
               } 
             />
-            {/* ============================================== */}
+            {/* ======================================== */}
 
-            {/* Rutas de Equipo */}
+            {/* ========== RUTAS DE EQUIPO ========== */}
             <Route 
               path="/equipo" 
               element={
@@ -214,6 +224,118 @@ function App() {
                 )
               } 
             />
+            {/* ====================================== */}
+
+            {/* ========== RUTAS DE CONTABILIDAD ========== */}
+            
+            {/* Asientos Contables */}
+            <Route 
+              path="/contabilidad/asientos" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <Asientos />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            <Route 
+              path="/contabilidad/nuevo-asiento" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <NuevoAsiento />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            <Route 
+              path="/contabilidad/asientos/:id" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <DetalleAsiento />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            {/* Reportes Contables */}
+            <Route 
+              path="/contabilidad/libro-diario" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <LibroDiario />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            <Route 
+              path="/contabilidad/libro-mayor" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <LibroMayor />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            <Route 
+              path="/contabilidad/balances" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <Balances />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+
+            {/* Plan de Cuentas */}
+            <Route 
+              path="/contabilidad/plan-cuentas" 
+              element={
+                usuario ? (
+                  <RequiereContexto>
+                    <LayoutPrincipal>
+                      <PlanCuentas />
+                    </LayoutPrincipal>
+                  </RequiereContexto>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+            {/* ========================================== */}
 
             {/* Rutas por defecto */}
             <Route 
