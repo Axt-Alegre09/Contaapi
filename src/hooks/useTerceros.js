@@ -1,33 +1,34 @@
 /**
- * HOOK PERSONALIZADO: useAsientos
- * Gestiona todas las operaciones de asientos contables
+ * HOOK PERSONALIZADO: useTerceros
+ * Gestiona todas las operaciones de terceros (clientes/proveedores)
  */
 
 import { useState, useCallback } from 'react';
 import { useEmpresa } from '../contextos/EmpresaContext';
-import asientosServicio from '../servicios/asientosServicio';
+import tercerosServicio from '../servicios/tercerosServicio';
 
-export const useAsientos = () => {
+export const useTerceros = () => {
   const { empresaActual } = useEmpresa();
-  const [asientos, setAsientos] = useState([]);
-  const [asientoActual, setAsientoActual] = useState(null);
-  const [cuentasImputables, setCuentasImputables] = useState([]);
+  const [terceros, setTerceros] = useState([]);
+  const [terceroActual, setTerceroActual] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // ============================================================================
-  // CREAR ASIENTO
+  // CREAR TERCERO
   // ============================================================================
   const crear = useCallback(async (datos) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.crearAsiento({
+      const resultado = await tercerosServicio.crearTercero({
         ...datos,
         empresaId: empresaActual?.id
       });
 
       if (resultado.success) {
+        // Recargar la lista de terceros
+        await listar({ tipo: datos.tipo });
         return { success: true, data: resultado.data };
       } else {
         setError(resultado.error);
@@ -42,42 +43,19 @@ export const useAsientos = () => {
   }, [empresaActual]);
 
   // ============================================================================
-  // VALIDAR ASIENTO (tiempo real)
+  // EDITAR TERCERO
   // ============================================================================
-  const validar = useCallback(async (asientoId) => {
+  const editar = useCallback(async (datos) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.validarAsiento(asientoId);
+      const resultado = await tercerosServicio.editarTercero(datos);
 
       if (resultado.success) {
-        return resultado.data;
-      } else {
-        setError(resultado.error);
-        return null;
-      }
-    } catch (err) {
-      setError(err.message);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // ============================================================================
-  // CONFIRMAR ASIENTO
-  // ============================================================================
-  const confirmar = useCallback(async (asientoId, confirmadoPor) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.confirmarAsiento(asientoId, confirmadoPor);
-
-      if (resultado.success) {
-        // Actualizar la lista de asientos si está cargada
-        setAsientos(prev =>
-          prev.map(a =>
-            a.id === asientoId ? { ...a, estado: 'confirmado' } : a
+        // Actualizar el tercero en la lista si está cargado
+        setTerceros(prev =>
+          prev.map(t =>
+            t.id === datos.terceroId ? { ...t, ...datos } : t
           )
         );
         return { success: true, data: resultado.data };
@@ -94,19 +72,19 @@ export const useAsientos = () => {
   }, []);
 
   // ============================================================================
-  // ANULAR ASIENTO
+  // DESACTIVAR TERCERO
   // ============================================================================
-  const anular = useCallback(async (asientoId, anuladoPor, motivo) => {
+  const desactivar = useCallback(async (terceroId) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.anularAsiento(asientoId, anuladoPor, motivo);
+      const resultado = await tercerosServicio.desactivarTercero(terceroId);
 
       if (resultado.success) {
-        // Actualizar la lista de asientos
-        setAsientos(prev =>
-          prev.map(a =>
-            a.id === asientoId ? { ...a, estado: 'anulado', anulado: true } : a
+        // Actualizar el estado en la lista
+        setTerceros(prev =>
+          prev.map(t =>
+            t.id === terceroId ? { ...t, activo: false } : t
           )
         );
         return { success: true, data: resultado.data };
@@ -123,15 +101,21 @@ export const useAsientos = () => {
   }, []);
 
   // ============================================================================
-  // MODIFICAR ASIENTO BORRADOR
+  // ACTIVAR TERCERO
   // ============================================================================
-  const modificar = useCallback(async (datos) => {
+  const activar = useCallback(async (terceroId) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.modificarAsientoBorrador(datos);
+      const resultado = await tercerosServicio.activarTercero(terceroId);
 
       if (resultado.success) {
+        // Actualizar el estado en la lista
+        setTerceros(prev =>
+          prev.map(t =>
+            t.id === terceroId ? { ...t, activo: true } : t
+          )
+        );
         return { success: true, data: resultado.data };
       } else {
         setError(resultado.error);
@@ -146,53 +130,28 @@ export const useAsientos = () => {
   }, []);
 
   // ============================================================================
-  // ELIMINAR ASIENTO BORRADOR
-  // ============================================================================
-  const eliminar = useCallback(async (asientoId) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.eliminarAsientoBorrador(asientoId);
-
-      if (resultado.success) {
-        // Quitar de la lista de asientos
-        setAsientos(prev => prev.filter(a => a.id !== asientoId));
-        return { success: true, data: resultado.data };
-      } else {
-        setError(resultado.error);
-        return { success: false, error: resultado.error };
-      }
-    } catch (err) {
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // ============================================================================
-  // LISTAR ASIENTOS CON FILTROS
+  // LISTAR TERCEROS
   // ============================================================================
   const listar = useCallback(async (filtros = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.listarAsientos({
+      const resultado = await tercerosServicio.listarTerceros({
         empresaId: empresaActual?.id,
         ...filtros
       });
 
       if (resultado.success) {
-        setAsientos(resultado.data);
+        setTerceros(resultado.data);
         return resultado.data;
       } else {
         setError(resultado.error);
-        setAsientos([]);
+        setTerceros([]);
         return [];
       }
     } catch (err) {
       setError(err.message);
-      setAsientos([]);
+      setTerceros([]);
       return [];
     } finally {
       setLoading(false);
@@ -200,25 +159,133 @@ export const useAsientos = () => {
   }, [empresaActual]);
 
   // ============================================================================
-  // OBTENER ASIENTO POR ID
+  // BUSCAR TERCEROS (Autocomplete)
   // ============================================================================
-  const obtenerPorId = useCallback(async (asientoId) => {
+  const buscar = useCallback(async (busqueda, tipo = null, limite = 20) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.obtenerAsientoPorId(asientoId);
+      const resultado = await tercerosServicio.buscarTerceros(
+        empresaActual?.id,
+        busqueda,
+        tipo,
+        limite
+      );
 
       if (resultado.success) {
-        setAsientoActual(resultado.data);
         return resultado.data;
       } else {
         setError(resultado.error);
-        setAsientoActual(null);
+        return [];
+      }
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual]);
+
+  // ============================================================================
+  // OBTENER TERCERO POR DOCUMENTO
+  // ============================================================================
+  const obtenerPorDocumento = useCallback(async (numeroDocumento) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const resultado = await tercerosServicio.obtenerTerceroPorDocumento(
+        empresaActual?.id,
+        numeroDocumento
+      );
+
+      if (resultado.success) {
+        setTerceroActual(resultado.data);
+        return resultado.data;
+      } else {
+        setError(resultado.error);
+        setTerceroActual(null);
         return null;
       }
     } catch (err) {
       setError(err.message);
-      setAsientoActual(null);
+      setTerceroActual(null);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual]);
+
+  // ============================================================================
+  // VERIFICAR DOCUMENTO DISPONIBLE
+  // ============================================================================
+  const verificarDocumento = useCallback(async (numeroDocumento, excluirId = null) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const resultado = await tercerosServicio.verificarDocumentoDisponible(
+        empresaActual?.id,
+        numeroDocumento,
+        excluirId
+      );
+
+      if (resultado.success) {
+        return resultado.data;
+      } else {
+        setError(resultado.error);
+        return null;
+      }
+    } catch (err) {
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual]);
+
+  // ============================================================================
+  // OBTENER MOVIMIENTOS DEL TERCERO
+  // ============================================================================
+  const obtenerMovimientos = useCallback(async (terceroId, fechaDesde = null, fechaHasta = null) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const resultado = await tercerosServicio.obtenerMovimientosTercero(
+        terceroId,
+        fechaDesde,
+        fechaHasta
+      );
+
+      if (resultado.success) {
+        return resultado.data;
+      } else {
+        setError(resultado.error);
+        return [];
+      }
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // ============================================================================
+  // OBTENER SALDO DEL TERCERO
+  // ============================================================================
+  const obtenerSaldo = useCallback(async (terceroId, fechaHasta = null) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const resultado = await tercerosServicio.obtenerSaldoTercero(terceroId, fechaHasta);
+
+      if (resultado.success) {
+        return resultado.data;
+      } else {
+        setError(resultado.error);
+        return null;
+      }
+    } catch (err) {
+      setError(err.message);
       return null;
     } finally {
       setLoading(false);
@@ -226,113 +293,11 @@ export const useAsientos = () => {
   }, []);
 
   // ============================================================================
-  // OBTENER CUENTAS IMPUTABLES (para selector)
-  // ============================================================================
-  const obtenerCuentas = useCallback(async (busqueda = null) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.obtenerCuentasImputables(
-        empresaActual?.id,
-        busqueda
-      );
-
-      if (resultado.success) {
-        setCuentasImputables(resultado.data);
-        return resultado.data;
-      } else {
-        setError(resultado.error);
-        setCuentasImputables([]);
-        return [];
-      }
-    } catch (err) {
-      setError(err.message);
-      setCuentasImputables([]);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [empresaActual]);
-
-  // ============================================================================
-  // REPORTES
-  // ============================================================================
-  const obtenerLibroDiario = useCallback(async (filtros = {}) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.obtenerLibroDiario({
-        empresaId: empresaActual?.id,
-        ...filtros
-      });
-
-      if (resultado.success) {
-        return resultado.data;
-      } else {
-        setError(resultado.error);
-        return [];
-      }
-    } catch (err) {
-      setError(err.message);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [empresaActual]);
-
-  const obtenerLibroMayor = useCallback(async (filtros = {}) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.obtenerLibroMayor({
-        empresaId: empresaActual?.id,
-        ...filtros
-      });
-
-      if (resultado.success) {
-        return resultado.data;
-      } else {
-        setError(resultado.error);
-        return [];
-      }
-    } catch (err) {
-      setError(err.message);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [empresaActual]);
-
-  const obtenerBalanceSumasSaldos = useCallback(async (filtros = {}) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.obtenerBalanceSumasSaldos({
-        empresaId: empresaActual?.id,
-        ...filtros
-      });
-
-      if (resultado.success) {
-        return resultado.data;
-      } else {
-        setError(resultado.error);
-        return [];
-      }
-    } catch (err) {
-      setError(err.message);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [empresaActual]);
-
-  // ============================================================================
   // LIMPIAR ESTADOS
   // ============================================================================
   const limpiar = useCallback(() => {
-    setAsientos([]);
-    setAsientoActual(null);
-    setCuentasImputables([]);
+    setTerceros([]);
+    setTerceroActual(null);
     setError(null);
   }, []);
 
@@ -341,33 +306,30 @@ export const useAsientos = () => {
   // ============================================================================
   return {
     // Estados
-    asientos,
-    asientoActual,
-    cuentasImputables,
+    terceros,
+    terceroActual,
     loading,
     error,
 
     // Operaciones CRUD
     crear,
-    validar,
-    confirmar,
-    anular,
-    modificar,
-    eliminar,
+    editar,
+    desactivar,
+    activar,
 
     // Consultas
     listar,
-    obtenerPorId,
-    obtenerCuentas,
+    buscar,
+    obtenerPorDocumento,
+    verificarDocumento,
 
-    // Reportes
-    obtenerLibroDiario,
-    obtenerLibroMayor,
-    obtenerBalanceSumasSaldos,
+    // Información adicional
+    obtenerMovimientos,
+    obtenerSaldo,
 
     // Utilidades
     limpiar
   };
 };
 
-export default useAsientos;
+export default useTerceros;

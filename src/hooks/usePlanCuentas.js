@@ -1,33 +1,62 @@
 /**
- * HOOK PERSONALIZADO: useAsientos
- * Gestiona todas las operaciones de asientos contables
+ * HOOK PERSONALIZADO: usePlanCuentas
+ * Gestiona todas las operaciones del plan de cuentas
  */
 
 import { useState, useCallback } from 'react';
 import { useEmpresa } from '../contextos/EmpresaContext';
-import asientosServicio from '../servicios/asientosServicio';
+import planCuentasServicio from '../servicios/planCuentasServicio';
 
-export const useAsientos = () => {
+export const usePlanCuentas = () => {
   const { empresaActual } = useEmpresa();
-  const [asientos, setAsientos] = useState([]);
-  const [asientoActual, setAsientoActual] = useState(null);
-  const [cuentasImputables, setCuentasImputables] = useState([]);
+  const [cuentas, setCuentas] = useState([]);
+  const [cuentaActual, setCuentaActual] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // ============================================================================
-  // CREAR ASIENTO
+  // COPIAR PLANTILLA
   // ============================================================================
-  const crear = useCallback(async (datos) => {
+  const copiarPlantilla = useCallback(async (tipoPlantilla) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.crearAsiento({
+      const resultado = await planCuentasServicio.copiarPlantilla(
+        empresaActual?.id,
+        tipoPlantilla
+      );
+
+      if (resultado.success) {
+        // Recargar el plan de cuentas después de copiar la plantilla
+        await listar();
+        return { success: true, data: resultado.data };
+      } else {
+        setError(resultado.error);
+        return { success: false, error: resultado.error };
+      }
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual]);
+
+  // ============================================================================
+  // AGREGAR CUENTA
+  // ============================================================================
+  const agregar = useCallback(async (datos) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const resultado = await planCuentasServicio.agregarCuenta({
         ...datos,
         empresaId: empresaActual?.id
       });
 
       if (resultado.success) {
+        // Recargar el plan de cuentas
+        await listar();
         return { success: true, data: resultado.data };
       } else {
         setError(resultado.error);
@@ -42,42 +71,19 @@ export const useAsientos = () => {
   }, [empresaActual]);
 
   // ============================================================================
-  // VALIDAR ASIENTO (tiempo real)
+  // EDITAR CUENTA
   // ============================================================================
-  const validar = useCallback(async (asientoId) => {
+  const editar = useCallback(async (datos) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.validarAsiento(asientoId);
+      const resultado = await planCuentasServicio.editarCuenta(datos);
 
       if (resultado.success) {
-        return resultado.data;
-      } else {
-        setError(resultado.error);
-        return null;
-      }
-    } catch (err) {
-      setError(err.message);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // ============================================================================
-  // CONFIRMAR ASIENTO
-  // ============================================================================
-  const confirmar = useCallback(async (asientoId, confirmadoPor) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.confirmarAsiento(asientoId, confirmadoPor);
-
-      if (resultado.success) {
-        // Actualizar la lista de asientos si está cargada
-        setAsientos(prev =>
-          prev.map(a =>
-            a.id === asientoId ? { ...a, estado: 'confirmado' } : a
+        // Actualizar la cuenta en la lista si está cargada
+        setCuentas(prev =>
+          prev.map(c =>
+            c.id === datos.cuentaId ? { ...c, ...datos } : c
           )
         );
         return { success: true, data: resultado.data };
@@ -94,19 +100,19 @@ export const useAsientos = () => {
   }, []);
 
   // ============================================================================
-  // ANULAR ASIENTO
+  // DESACTIVAR CUENTA
   // ============================================================================
-  const anular = useCallback(async (asientoId, anuladoPor, motivo) => {
+  const desactivar = useCallback(async (cuentaId) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.anularAsiento(asientoId, anuladoPor, motivo);
+      const resultado = await planCuentasServicio.desactivarCuenta(cuentaId);
 
       if (resultado.success) {
-        // Actualizar la lista de asientos
-        setAsientos(prev =>
-          prev.map(a =>
-            a.id === asientoId ? { ...a, estado: 'anulado', anulado: true } : a
+        // Actualizar el estado en la lista
+        setCuentas(prev =>
+          prev.map(c =>
+            c.id === cuentaId ? { ...c, activo: false } : c
           )
         );
         return { success: true, data: resultado.data };
@@ -123,15 +129,21 @@ export const useAsientos = () => {
   }, []);
 
   // ============================================================================
-  // MODIFICAR ASIENTO BORRADOR
+  // ACTIVAR CUENTA
   // ============================================================================
-  const modificar = useCallback(async (datos) => {
+  const activar = useCallback(async (cuentaId) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.modificarAsientoBorrador(datos);
+      const resultado = await planCuentasServicio.activarCuenta(cuentaId);
 
       if (resultado.success) {
+        // Actualizar el estado en la lista
+        setCuentas(prev =>
+          prev.map(c =>
+            c.id === cuentaId ? { ...c, activo: true } : c
+          )
+        );
         return { success: true, data: resultado.data };
       } else {
         setError(resultado.error);
@@ -146,108 +158,29 @@ export const useAsientos = () => {
   }, []);
 
   // ============================================================================
-  // ELIMINAR ASIENTO BORRADOR
+  // LISTAR PLAN DE CUENTAS JERÁRQUICO
   // ============================================================================
-  const eliminar = useCallback(async (asientoId) => {
+  const listar = useCallback(async (soloActivas = true, soloImputables = false) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.eliminarAsientoBorrador(asientoId);
-
-      if (resultado.success) {
-        // Quitar de la lista de asientos
-        setAsientos(prev => prev.filter(a => a.id !== asientoId));
-        return { success: true, data: resultado.data };
-      } else {
-        setError(resultado.error);
-        return { success: false, error: resultado.error };
-      }
-    } catch (err) {
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // ============================================================================
-  // LISTAR ASIENTOS CON FILTROS
-  // ============================================================================
-  const listar = useCallback(async (filtros = {}) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.listarAsientos({
-        empresaId: empresaActual?.id,
-        ...filtros
-      });
-
-      if (resultado.success) {
-        setAsientos(resultado.data);
-        return resultado.data;
-      } else {
-        setError(resultado.error);
-        setAsientos([]);
-        return [];
-      }
-    } catch (err) {
-      setError(err.message);
-      setAsientos([]);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [empresaActual]);
-
-  // ============================================================================
-  // OBTENER ASIENTO POR ID
-  // ============================================================================
-  const obtenerPorId = useCallback(async (asientoId) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.obtenerAsientoPorId(asientoId);
-
-      if (resultado.success) {
-        setAsientoActual(resultado.data);
-        return resultado.data;
-      } else {
-        setError(resultado.error);
-        setAsientoActual(null);
-        return null;
-      }
-    } catch (err) {
-      setError(err.message);
-      setAsientoActual(null);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // ============================================================================
-  // OBTENER CUENTAS IMPUTABLES (para selector)
-  // ============================================================================
-  const obtenerCuentas = useCallback(async (busqueda = null) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await asientosServicio.obtenerCuentasImputables(
+      const resultado = await planCuentasServicio.listarPlanCuentasJerarquico(
         empresaActual?.id,
-        busqueda
+        soloActivas,
+        soloImputables
       );
 
       if (resultado.success) {
-        setCuentasImputables(resultado.data);
+        setCuentas(resultado.data);
         return resultado.data;
       } else {
         setError(resultado.error);
-        setCuentasImputables([]);
+        setCuentas([]);
         return [];
       }
     } catch (err) {
       setError(err.message);
-      setCuentasImputables([]);
+      setCuentas([]);
       return [];
     } finally {
       setLoading(false);
@@ -255,16 +188,18 @@ export const useAsientos = () => {
   }, [empresaActual]);
 
   // ============================================================================
-  // REPORTES
+  // BUSCAR CUENTAS (Autocomplete)
   // ============================================================================
-  const obtenerLibroDiario = useCallback(async (filtros = {}) => {
+  const buscar = useCallback(async (busqueda, soloImputables = false, limite = 20) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.obtenerLibroDiario({
-        empresaId: empresaActual?.id,
-        ...filtros
-      });
+      const resultado = await planCuentasServicio.buscarCuentas(
+        empresaActual?.id,
+        busqueda,
+        soloImputables,
+        limite
+      );
 
       if (resultado.success) {
         return resultado.data;
@@ -280,47 +215,56 @@ export const useAsientos = () => {
     }
   }, [empresaActual]);
 
-  const obtenerLibroMayor = useCallback(async (filtros = {}) => {
+  // ============================================================================
+  // OBTENER CUENTA POR CÓDIGO
+  // ============================================================================
+  const obtenerPorCodigo = useCallback(async (codigo) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.obtenerLibroMayor({
-        empresaId: empresaActual?.id,
-        ...filtros
-      });
+      const resultado = await planCuentasServicio.obtenerCuentaPorCodigo(
+        empresaActual?.id,
+        codigo
+      );
 
       if (resultado.success) {
+        setCuentaActual(resultado.data);
         return resultado.data;
       } else {
         setError(resultado.error);
-        return [];
+        setCuentaActual(null);
+        return null;
       }
     } catch (err) {
       setError(err.message);
-      return [];
+      setCuentaActual(null);
+      return null;
     } finally {
       setLoading(false);
     }
   }, [empresaActual]);
 
-  const obtenerBalanceSumasSaldos = useCallback(async (filtros = {}) => {
+  // ============================================================================
+  // VERIFICAR CÓDIGO DISPONIBLE
+  // ============================================================================
+  const verificarCodigo = useCallback(async (codigo) => {
     setLoading(true);
     setError(null);
     try {
-      const resultado = await asientosServicio.obtenerBalanceSumasSaldos({
-        empresaId: empresaActual?.id,
-        ...filtros
-      });
+      const resultado = await planCuentasServicio.verificarCodigoDisponible(
+        empresaActual?.id,
+        codigo
+      );
 
       if (resultado.success) {
         return resultado.data;
       } else {
         setError(resultado.error);
-        return [];
+        return null;
       }
     } catch (err) {
       setError(err.message);
-      return [];
+      return null;
     } finally {
       setLoading(false);
     }
@@ -330,9 +274,8 @@ export const useAsientos = () => {
   // LIMPIAR ESTADOS
   // ============================================================================
   const limpiar = useCallback(() => {
-    setAsientos([]);
-    setAsientoActual(null);
-    setCuentasImputables([]);
+    setCuentas([]);
+    setCuentaActual(null);
     setError(null);
   }, []);
 
@@ -341,33 +284,27 @@ export const useAsientos = () => {
   // ============================================================================
   return {
     // Estados
-    asientos,
-    asientoActual,
-    cuentasImputables,
+    cuentas,
+    cuentaActual,
     loading,
     error,
 
-    // Operaciones CRUD
-    crear,
-    validar,
-    confirmar,
-    anular,
-    modificar,
-    eliminar,
+    // Operaciones
+    copiarPlantilla,
+    agregar,
+    editar,
+    desactivar,
+    activar,
 
     // Consultas
     listar,
-    obtenerPorId,
-    obtenerCuentas,
-
-    // Reportes
-    obtenerLibroDiario,
-    obtenerLibroMayor,
-    obtenerBalanceSumasSaldos,
+    buscar,
+    obtenerPorCodigo,
+    verificarCodigo,
 
     // Utilidades
     limpiar
   };
 };
 
-export default useAsientos;
+export default usePlanCuentas;
