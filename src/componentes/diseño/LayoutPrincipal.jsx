@@ -48,11 +48,11 @@ export function LayoutPrincipal({ children }) {
     {
       titulo: 'Contabilidad',
       items: [
-        { nombre: 'Plan de Cuentas', icono: FileText, ruta: '/plan-cuentas' },
-        { nombre: 'Asientos Contables', icono: FileText, ruta: '/asientos' },
-        { nombre: 'Libro Diario', icono: FileText, ruta: '/libro-diario' },
-        { nombre: 'Libro Mayor', icono: FileText, ruta: '/libro-mayor' },
-        { nombre: 'Balances', icono: FileText, ruta: '/balances' },
+        { nombre: 'Plan de Cuentas', icono: FileText, ruta: '/contabilidad/plan-cuentas' },
+        { nombre: 'Asientos Contables', icono: FileText, ruta: '/contabilidad/asientos' },
+        { nombre: 'Libro Diario', icono: FileText, ruta: '/contabilidad/libro-diario' },
+        { nombre: 'Libro Mayor', icono: FileText, ruta: '/contabilidad/libro-mayor' },
+        { nombre: 'Balances', icono: FileText, ruta: '/contabilidad/balances' },
       ]
     },
     {
