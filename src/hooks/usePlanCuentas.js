@@ -1,298 +1,239 @@
 /**
- * HOOK PERSONALIZADO: usePlanCuentas
- * Gestiona todas las operaciones del plan de cuentas con CRUD completo
+ * HOOK: usePlanCuentas
+ * Gestiona el plan de cuentas con multi-tenancy
  */
 
 import { useState, useCallback } from 'react';
 import { useEmpresa } from '../contextos/EmpresaContext';
-import { useAutenticacion } from './useAutenticacion';
-import planCuentasServicio from '../servicios/planCuentasServicio';
+import * as planCuentasServicio from '../servicios/planCuentasServicio';
 
 export const usePlanCuentas = () => {
   const { empresaActual } = useEmpresa();
-  const { usuario } = useAutenticacion();
+  
   const [cuentas, setCuentas] = useState([]);
-  const [cuentaActual, setCuentaActual] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ============================================================================
-  // LISTAR PLAN DE CUENTAS
-  // ============================================================================
-  const listar = useCallback(async (soloActivas = true, soloImputables = false) => {
-    if (!empresaActual?.id) return { success: false, error: 'No hay empresa seleccionada' };
+  // Validar empresa antes de cada operación
+  const validarEmpresa = () => {
+    if (!empresaActual) {
+      throw new Error('No hay empresa seleccionada');
+    }
+    return empresaActual.id;
+  };
 
-    setLoading(true);
-    setError(null);
+  const listar = useCallback(async (soloActivas = true, incluirPadres = false) => {
     try {
+      const empresaId = validarEmpresa();
+      setLoading(true);
+      setError(null);
+
       const resultado = await planCuentasServicio.listar(
-        empresaActual.id,
-        soloActivas,
-        soloImputables
+        empresaId,
+        soloActivas, 
+        incluirPadres
       );
 
       if (resultado.success) {
-        setCuentas(resultado.data);
-        return { success: true, data: resultado.data };
+        setCuentas(resultado.data || []);
       } else {
         setError(resultado.error);
-        return { success: false, error: resultado.error };
       }
     } catch (err) {
       setError(err.message);
-      return { success: false, error: err.message };
+      console.error('Error listando cuentas:', err);
     } finally {
       setLoading(false);
     }
   }, [empresaActual]);
 
-  // ============================================================================
-  // BUSCAR CUENTAS
-  // ============================================================================
-  const buscar = useCallback(async (filtros = {}) => {
-    if (!empresaActual?.id) return { success: false, error: 'No hay empresa seleccionada' };
-
-    setLoading(true);
-    setError(null);
+  const buscar = useCallback(async (filtros) => {
     try {
-      const resultado = await planCuentasServicio.buscar(empresaActual.id, filtros);
+      const empresaId = validarEmpresa();
+      setLoading(true);
+      setError(null);
+
+      const resultado = await planCuentasServicio.buscar(
+        empresaId,
+        filtros
+      );
 
       if (resultado.success) {
-        setCuentas(resultado.data);
-        return { success: true, data: resultado.data };
+        setCuentas(resultado.data || []);
       } else {
         setError(resultado.error);
-        return { success: false, error: resultado.error };
       }
     } catch (err) {
       setError(err.message);
-      return { success: false, error: err.message };
+      console.error('Error buscando cuentas:', err);
     } finally {
       setLoading(false);
     }
   }, [empresaActual]);
 
-  // ============================================================================
-  // OBTENER CUENTA POR ID
-  // ============================================================================
-  const obtenerPorId = useCallback(async (cuentaId) => {
-    setLoading(true);
-    setError(null);
+  const crear = useCallback(async (datos) => {
     try {
-      const resultado = await planCuentasServicio.obtenerPorId(cuentaId);
+      const empresaId = validarEmpresa();
+      setLoading(true);
+      setError(null);
+
+      const resultado = await planCuentasServicio.crear({
+        ...datos,
+        empresa_id: empresaId
+      });
 
       if (resultado.success) {
-        setCuentaActual(resultado.data);
-        return { success: true, data: resultado.data };
-      } else {
-        setError(resultado.error);
-        return { success: false, error: resultado.error };
-      }
-    } catch (err) {
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // ============================================================================
-  // AGREGAR CUENTA
-  // ============================================================================
-  const agregar = useCallback(async (datos) => {
-    if (!empresaActual?.id) return { success: false, error: 'No hay empresa seleccionada' };
-
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await planCuentasServicio.agregar(
-        empresaActual.id,
-        datos,
-        usuario?.id
-      );
-
-      if (resultado.success) {
-        // Recargar lista
         await listar();
-        return { success: true, data: resultado.data };
+        return resultado;
       } else {
         setError(resultado.error);
-        return { success: false, error: resultado.error };
+        return resultado;
       }
     } catch (err) {
       setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
-    }
-  }, [empresaActual, usuario, listar]);
-
-  // ============================================================================
-  // ACTUALIZAR CUENTA
-  // ============================================================================
-  const actualizar = useCallback(async (cuentaId, datos) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await planCuentasServicio.actualizar(
-        cuentaId,
-        datos,
-        usuario?.id
-      );
-
-      if (resultado.success) {
-        // Recargar lista
-        await listar();
-        return { success: true, data: resultado.data };
-      } else {
-        setError(resultado.error);
-        return { success: false, error: resultado.error };
-      }
-    } catch (err) {
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
-    }
-  }, [usuario, listar]);
-
-  // ============================================================================
-  // ELIMINAR CUENTA
-  // ============================================================================
-  const eliminar = useCallback(async (cuentaId) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await planCuentasServicio.eliminar(cuentaId, usuario?.id);
-
-      if (resultado.success) {
-        // Recargar lista
-        await listar();
-        return { success: true, data: resultado.data };
-      } else {
-        setError(resultado.error);
-        return { success: false, error: resultado.error };
-      }
-    } catch (err) {
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
-    }
-  }, [usuario, listar]);
-
-  // ============================================================================
-  // COPIAR PLANTILLA
-  // ============================================================================
-  const copiarPlantilla = useCallback(async (tipoPlantilla) => {
-    if (!empresaActual?.id) return { success: false, error: 'No hay empresa seleccionada' };
-
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await planCuentasServicio.copiarPlantilla(
-        empresaActual.id,
-        tipoPlantilla
-      );
-
-      if (resultado.success) {
-        // Recargar el plan de cuentas después de copiar la plantilla
-        await listar();
-        return { success: true, data: resultado.data };
-      } else {
-        setError(resultado.error);
-        return { success: false, error: resultado.error };
-      }
-    } catch (err) {
-      setError(err.message);
+      console.error('Error creando cuenta:', err);
       return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
   }, [empresaActual, listar]);
 
-  // ============================================================================
-  // OBTENER CUENTAS PARA SELECT
-  // ============================================================================
-  const obtenerParaSelect = useCallback(async () => {
-    if (!empresaActual?.id) return { success: false, error: 'No hay empresa seleccionada' };
-
+  const actualizar = useCallback(async (id, datos) => {
     try {
-      const resultado = await planCuentasServicio.obtenerParaSelect(empresaActual.id);
-      return resultado;
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  }, [empresaActual]);
+      validarEmpresa();
+      setLoading(true);
+      setError(null);
 
-  // ============================================================================
-  // OBTENER CUENTAS PADRE
-  // ============================================================================
-  const obtenerCuentasPadre = useCallback(async () => {
-    if (!empresaActual?.id) return { success: false, error: 'No hay empresa seleccionada' };
-
-    try {
-      const resultado = await planCuentasServicio.obtenerCuentasPadre(empresaActual.id);
-      return resultado;
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  }, [empresaActual]);
-
-  // ============================================================================
-  // ELIMINAR TODO EL PLAN DE CUENTAS
-  // ============================================================================
-  const eliminarTodo = useCallback(async () => {
-    if (!empresaActual?.id) return { success: false, error: 'No hay empresa seleccionada' };
-
-    setLoading(true);
-    setError(null);
-    try {
-      const resultado = await planCuentasServicio.eliminarTodo(
-        empresaActual.id,
-        usuario?.id
-      );
+      const resultado = await planCuentasServicio.actualizar(id, datos);
 
       if (resultado.success) {
-        // Recargar lista (estará vacía)
         await listar();
-        return { success: true, data: resultado.data };
+        return resultado;
       } else {
         setError(resultado.error);
-        return { success: false, error: resultado.error };
+        return resultado;
       }
     } catch (err) {
       setError(err.message);
+      console.error('Error actualizando cuenta:', err);
       return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
-  }, [empresaActual, usuario, listar]);
+  }, [empresaActual, listar]);
+
+  const eliminar = useCallback(async (id) => {
+    try {
+      validarEmpresa();
+      setLoading(true);
+      setError(null);
+
+      const resultado = await planCuentasServicio.eliminar(id);
+
+      if (resultado.success) {
+        await listar();
+        return resultado;
+      } else {
+        setError(resultado.error);
+        return resultado;
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error eliminando cuenta:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual, listar]);
+
+  const copiarPlantilla = useCallback(async (tipo) => {
+    try {
+      const empresaId = validarEmpresa();
+      setLoading(true);
+      setError(null);
+
+      const resultado = await planCuentasServicio.copiarPlantilla(
+        empresaId,
+        tipo
+      );
+
+      if (resultado.success) {
+        await listar();
+        return resultado;
+      } else {
+        setError(resultado.error);
+        return resultado;
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error copiando plantilla:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual, listar]);
+
+  const eliminarTodo = useCallback(async () => {
+    try {
+      const empresaId = validarEmpresa();
+      setLoading(true);
+      setError(null);
+
+      const resultado = await planCuentasServicio.eliminarTodo(empresaId);
+
+      if (resultado.success) {
+        await listar();
+        return resultado;
+      } else {
+        setError(resultado.error);
+        return resultado;
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error eliminando plan:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual, listar]);
+
+  const obtenerPorId = useCallback(async (id) => {
+    try {
+      validarEmpresa();
+      setLoading(true);
+      setError(null);
+
+      const resultado = await planCuentasServicio.obtenerPorId(id);
+
+      if (resultado.success) {
+        return resultado;
+      } else {
+        setError(resultado.error);
+        return resultado;
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error obteniendo cuenta:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual]);
 
   return {
-    // Estado
     cuentas,
-    cuentaActual,
     loading,
     error,
-
-    // Métodos CRUD
     listar,
     buscar,
-    obtenerPorId,
-    agregar,
+    crear,
     actualizar,
     eliminar,
-    eliminarTodo,  // Nueva función
-
-    // Métodos auxiliares
     copiarPlantilla,
-    obtenerParaSelect,
-    obtenerCuentasPadre,
-
-    // Setters
-    setCuentas,
-    setCuentaActual,
-    setError
+    eliminarTodo,
+    obtenerPorId,
+    empresaActual
   };
 };
+
+export default usePlanCuentas;
