@@ -3,7 +3,7 @@
  * Gestiona todas las operaciones con el plan de cuentas
  */
 
-import { supabase } from '../lib/supabase';
+import { supabase } from '../configuracion/supabase';
 
 const planCuentasServicio = {
   
