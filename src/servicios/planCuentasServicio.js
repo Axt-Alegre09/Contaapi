@@ -263,6 +263,32 @@ const planCuentasServicio = {
       console.error('Error al obtener cuentas padre:', error);
       return { success: false, error: error.message };
     }
+  },
+
+  // ============================================================================
+  // ELIMINAR TODO EL PLAN DE CUENTAS
+  // ============================================================================
+  async eliminarTodo(empresaId, usuarioId = null) {
+    try {
+      const { data, error } = await supabase.rpc('eliminar_todo_plan_cuentas', {
+        p_empresa_id: empresaId,
+        p_usuario_id: usuarioId
+      });
+
+      if (error) throw error;
+
+      if (data && typeof data === 'object') {
+        if (data.success === false) {
+          throw new Error(data.message || 'Error al eliminar plan de cuentas');
+        }
+        return { success: true, data };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error al eliminar todo el plan:', error);
+      return { success: false, error: error.message };
+    }
   }
 };
 

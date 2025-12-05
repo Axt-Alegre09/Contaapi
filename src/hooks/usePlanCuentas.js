@@ -239,6 +239,36 @@ export const usePlanCuentas = () => {
     }
   }, [empresaActual]);
 
+  // ============================================================================
+  // ELIMINAR TODO EL PLAN DE CUENTAS
+  // ============================================================================
+  const eliminarTodo = useCallback(async () => {
+    if (!empresaActual?.id) return { success: false, error: 'No hay empresa seleccionada' };
+
+    setLoading(true);
+    setError(null);
+    try {
+      const resultado = await planCuentasServicio.eliminarTodo(
+        empresaActual.id,
+        usuario?.id
+      );
+
+      if (resultado.success) {
+        // Recargar lista (estará vacía)
+        await listar();
+        return { success: true, data: resultado.data };
+      } else {
+        setError(resultado.error);
+        return { success: false, error: resultado.error };
+      }
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaActual, usuario, listar]);
+
   return {
     // Estado
     cuentas,
@@ -253,6 +283,7 @@ export const usePlanCuentas = () => {
     agregar,
     actualizar,
     eliminar,
+    eliminarTodo,  // Nueva función
 
     // Métodos auxiliares
     copiarPlantilla,

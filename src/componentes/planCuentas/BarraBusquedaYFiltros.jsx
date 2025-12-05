@@ -3,11 +3,11 @@
  * Búsqueda y filtros para el plan de cuentas
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { usePlanCuentas } from '../../hooks/usePlanCuentas';
 
-export const BarraBusquedaYFiltros = () => {
+export const BarraBusquedaYFiltros = forwardRef((props, ref) => {
   const { buscar, listar } = usePlanCuentas();
   const [termino, setTermino] = useState('');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
@@ -17,6 +17,11 @@ export const BarraBusquedaYFiltros = () => {
     soloImputables: false,
     soloActivas: true
   });
+
+  // Exponer función para limpiar desde componente padre
+  useImperativeHandle(ref, () => ({
+    limpiar: limpiarFiltros
+  }));
 
   // Búsqueda con debounce
   useEffect(() => {
@@ -193,4 +198,4 @@ export const BarraBusquedaYFiltros = () => {
       )}
     </div>
   );
-};
+});
