@@ -1,20 +1,16 @@
 /**
- * PÁGINA: Plan de Cuentas OPTIMIZADA
- * - Actualización automática
- * - Limpieza de filtros post-crear/editar
- * - Botón para limpiar TODO el plan
+ * PÁGINA: Plan de Cuentas CORREGIDA
+ * Búsqueda y filtros funcionan correctamente
  */
 
-import { useEffect, useState, useRef } from 'react';
-import { FileText, Plus, Edit2, Trash2, AlertCircle, AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { FileText, Plus, Edit2, Trash2, AlertCircle, AlertTriangle, Search, Filter, X } from 'lucide-react';
 import { usePlanCuentas } from '../../hooks/usePlanCuentas';
 import { ModalNuevaCuenta } from '../../componentes/planCuentas/ModalNuevaCuenta';
 import { ModalEditarCuenta } from '../../componentes/planCuentas/ModalEditarCuenta';
-import { BarraBusquedaYFiltros } from '../../componentes/planCuentas/BarraBusquedaYFiltros';
 
 const PlanCuentas = () => {
-  const { cuentas, loading, error, listar, eliminar, eliminarTodo, copiarPlantilla } = usePlanCuentas();
-  const filtrosRef = useRef(null);  // Referencia para limpiar filtros
+  const { cuentas, loading, error, listar, buscar, eliminar, eliminarTodo, copiarPlantilla } = usePlanCuentas();
   
   const [modalNueva, setModalNueva] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
@@ -27,29 +23,66 @@ const PlanCuentas = () => {
   const [loadingLimpiar, setLoadingLimpiar] = useState(false);
   const [confirmacionTexto, setConfirmacionTexto] = useState('');
 
+  // Estados de búsqueda y filtros
+  const [termino, setTermino] = useState('');
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [filtros, setFiltros] = useState({
+    nivel: '',
+    tipoCuenta: '',
+    soloImputables: false,
+    soloActivas: true
+  });
+
   useEffect(() => {
     cargarCuentas();
   }, []);
+
+  // Aplicar búsqueda con debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      aplicarBusqueda();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [termino, filtros]);
 
   const cargarCuentas = async () => {
     await listar();
   };
 
+  const aplicarBusqueda = () => {
+    if (termino || filtros.nivel || filtros.tipoCuenta || filtros.soloImputables) {
+      buscar({
+        termino: termino || null,
+        nivel: filtros.nivel ? parseInt(filtros.nivel) : null,
+        tipoCuenta: filtros.tipoCuenta || null,
+        soloImputables: filtros.soloImputables,
+        soloActivas: filtros.soloActivas
+      });
+    } else {
+      listar(filtros.soloActivas, false);
+    }
+  };
+
+  const limpiarFiltros = () => {
+    setTermino('');
+    setFiltros({
+      nivel: '',
+      tipoCuenta: '',
+      soloImputables: false,
+      soloActivas: true
+    });
+  };
+
   const handleNuevaCuentaCerrar = () => {
     setModalNueva(false);
-    // Limpiar filtros para ver la cuenta recién creada
-    if (filtrosRef.current) {
-      filtrosRef.current.limpiar();
-    }
+    limpiarFiltros();
   };
 
   const handleEditarCerrar = () => {
     setModalEditar(false);
     setCuentaSeleccionada(null);
-    // Limpiar filtros para ver los cambios
-    if (filtrosRef.current) {
-      filtrosRef.current.limpiar();
-    }
+    limpiarFiltros();
   };
 
   const handleEditar = (cuenta) => {
@@ -65,7 +98,7 @@ const PlanCuentas = () => {
       const resultado = await eliminar(cuenta.id);
       
       if (resultado.success) {
-        // Éxito - la lista se recarga automáticamente
+        // Éxito
       } else {
         alert(`Error: ${resultado.error}`);
       }
@@ -92,10 +125,7 @@ const PlanCuentas = () => {
     if (resultado.success) {
       alert(`✓ ${resultado.data.message}`);
       setModalConfirmarLimpiar(false);
-      // Limpiar filtros
-      if (filtrosRef.current) {
-        filtrosRef.current.limpiar();
-      }
+      limpiarFiltros();
     } else {
       alert(`Error: ${resultado.error}`);
     }
@@ -115,10 +145,7 @@ const PlanCuentas = () => {
     
     if (resultado.success) {
       setModalPlantilla(false);
-      // Limpiar filtros para ver todas las cuentas copiadas
-      if (filtrosRef.current) {
-        filtrosRef.current.limpiar();
-      }
+      limpiarFiltros();
     } else {
       alert(`Error: ${resultado.error}`);
     }
@@ -136,6 +163,8 @@ const PlanCuentas = () => {
     };
     return colores[tipo] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300';
   };
+
+  const hayFiltrosActivos = termino || filtros.nivel || filtros.tipoCuenta || filtros.soloImputables;
 
   return (
     <div className="space-y-6">
@@ -185,8 +214,139 @@ const PlanCuentas = () => {
         </div>
       </div>
 
-      {/* Barra de búsqueda y filtros */}
-      <BarraBusquedaYFiltros ref={filtrosRef} />
+      {/* Barra de búsqueda y filtros - INTEGRADA */}
+      <div className="space-y-4">
+        {/* Barra de búsqueda */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Input de búsqueda */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={termino}
+              onChange={(e) => setTermino(e.target.value)}
+              placeholder="Buscar por código o nombre..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 
+                rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          {/* Botón de filtros */}
+          <button
+            onClick={() => setMostrarFiltros(!mostrarFiltros)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-all
+              ${mostrarFiltros 
+                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-700 dark:text-blue-300' 
+                : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+              } hover:bg-blue-50 dark:hover:bg-blue-900/20`}
+          >
+            <Filter className="w-5 h-5" />
+            <span className="font-medium">Filtros</span>
+            {hayFiltrosActivos && (
+              <span className="ml-1 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full">
+                {[termino && 1, filtros.nivel && 1, filtros.tipoCuenta && 1, filtros.soloImputables && 1].filter(Boolean).length}
+              </span>
+            )}
+          </button>
+
+          {/* Botón limpiar */}
+          {hayFiltrosActivos && (
+            <button
+              onClick={limpiarFiltros}
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 
+                text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 
+                transition-all"
+            >
+              <X className="w-5 h-5" />
+              <span className="font-medium">Limpiar</span>
+            </button>
+          )}
+        </div>
+
+        {/* Panel de filtros expandible */}
+        {mostrarFiltros && (
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Filtro por nivel */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Nivel
+                </label>
+                <select
+                  value={filtros.nivel}
+                  onChange={(e) => setFiltros({...filtros, nivel: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Todos los niveles</option>
+                  <option value="1">Nivel 1</option>
+                  <option value="2">Nivel 2</option>
+                  <option value="3">Nivel 3</option>
+                  <option value="4">Nivel 4</option>
+                  <option value="5">Nivel 5</option>
+                </select>
+              </div>
+
+              {/* Filtro por tipo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tipo de Cuenta
+                </label>
+                <select
+                  value={filtros.tipoCuenta}
+                  onChange={(e) => setFiltros({...filtros, tipoCuenta: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Todos los tipos</option>
+                  <option value="Activo">Activo</option>
+                  <option value="Pasivo">Pasivo</option>
+                  <option value="Patrimonio">Patrimonio</option>
+                  <option value="Ingreso">Ingreso</option>
+                  <option value="Gasto">Gasto</option>
+                </select>
+              </div>
+
+              {/* Checkboxes */}
+              <div className="flex flex-col justify-end space-y-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filtros.soloImputables}
+                    onChange={(e) => setFiltros({...filtros, soloImputables: e.target.checked})}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Solo imputables</span>
+                </label>
+
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filtros.soloActivas}
+                    onChange={(e) => setFiltros({...filtros, soloActivas: e.target.checked})}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Solo activas</span>
+                </label>
+              </div>
+
+              {/* Indicador de resultados */}
+              <div className="flex flex-col justify-center items-center bg-blue-50 dark:bg-blue-900/20 
+                rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {cuentas.length}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  cuentas encontradas
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Error */}
       {error && (
@@ -313,25 +473,37 @@ const PlanCuentas = () => {
             No hay cuentas contables
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
-            Comienza copiando una plantilla predefinida o crea cuentas manualmente
+            {hayFiltrosActivos 
+              ? 'No se encontraron cuentas con los filtros aplicados' 
+              : 'Comienza copiando una plantilla predefinida o crea cuentas manualmente'
+            }
           </p>
-          <div className="flex justify-center gap-3">
+          {hayFiltrosActivos ? (
             <button
-              onClick={() => setModalPlantilla(true)}
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg 
-                hover:from-blue-700 hover:to-purple-700 transition-all"
+              onClick={limpiarFiltros}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
             >
-              Copiar Plantilla
+              Limpiar Filtros
             </button>
-            <button
-              onClick={() => setModalNueva(true)}
-              className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 
-                dark:hover:bg-gray-600 transition-all"
-            >
-              Crear Manualmente
-            </button>
-          </div>
+          ) : (
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setModalPlantilla(true)}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg 
+                  hover:from-blue-700 hover:to-purple-700 transition-all"
+              >
+                Copiar Plantilla
+              </button>
+              <button
+                onClick={() => setModalNueva(true)}
+                className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                  border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 
+                  dark:hover:bg-gray-600 transition-all"
+              >
+                Crear Manualmente
+              </button>
+            </div>
+          )}
         </div>
       )}
 
