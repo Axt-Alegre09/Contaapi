@@ -1,6 +1,6 @@
 /**
  * SERVICIO: Plan de Cuentas
- * Adaptado para usar las funciones existentes en Supabase
+ * Adaptado para tabla con columna 'activo' (boolean)
  */
 
 import { supabase } from '../configuracion/supabase';
@@ -80,7 +80,7 @@ export const crear = async (datos) => {
         categoria_iva: datos.categoria_iva || null,
         codigo_impositivo: datos.codigo_impositivo || null,
         descripcion: datos.descripcion || null,
-        estado: 'activa'
+        activo: true  // ✅ Columna activo (boolean)
       })
       .select()
       .single();
@@ -148,7 +148,7 @@ export const eliminar = async (id) => {
     const { data, error } = await supabase
       .from('plan_cuentas')
       .update({
-        estado: 'inactiva',
+        activo: false,  // ✅ Columna activo (boolean)
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -255,8 +255,8 @@ export const obtenerCuentasPadres = async (empresaId) => {
       .from('plan_cuentas')
       .select('id, codigo, nombre, nivel')
       .eq('empresa_id', empresaId)
-      .eq('estado', 'activa')
-      .eq('es_imputable', false)  // Solo cuentas no imputables pueden ser padres
+      .eq('activo', true)  // ✅ Columna activo (boolean)
+      .eq('es_imputable', false)
       .order('codigo');
 
     if (error) throw error;
@@ -283,7 +283,6 @@ export const obtenerCuentasPadres = async (empresaId) => {
 export const obtenerCuentasImputables = async (empresaId, busqueda = null) => {
   try {
     if (busqueda) {
-      // Usar función existente de Supabase
       const { data, error } = await supabase.rpc('obtener_cuentas_imputables', {
         p_empresa_id: empresaId,
         p_busqueda: busqueda
@@ -296,12 +295,11 @@ export const obtenerCuentasImputables = async (empresaId, busqueda = null) => {
         data: data || []
       };
     } else {
-      // Query directa para todas
       const { data, error } = await supabase
         .from('plan_cuentas')
         .select('id, codigo, nombre, tipo_cuenta, naturaleza')
         .eq('empresa_id', empresaId)
-        .eq('estado', 'activa')
+        .eq('activo', true)  // ✅ Columna activo (boolean)
         .eq('es_imputable', true)
         .order('codigo');
 
