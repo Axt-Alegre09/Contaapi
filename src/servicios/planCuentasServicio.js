@@ -1,6 +1,6 @@
 /**
  * SERVICIO: Plan de Cuentas
- * Todas las operaciones incluyen empresa_id para multi-tenancy
+ * Adaptado para usar las funciones existentes en Supabase
  */
 
 import { supabase } from '../configuracion/supabase';
@@ -8,12 +8,11 @@ import { supabase } from '../configuracion/supabase';
 /**
  * Listar cuentas contables de una empresa
  */
-export const listar = async (empresaId, soloActivas = true, incluirPadres = false) => {
+export const listar = async (empresaId, soloActivas = true) => {
   try {
-    const { data, error } = await supabase.rpc('listar_cuentas', {
+    const { data, error } = await supabase.rpc('listar_plan_cuentas_jerarquico', {
       p_empresa_id: empresaId,
-      p_solo_activas: soloActivas,
-      p_incluir_padres: incluirPadres
+      p_solo_activas: soloActivas
     });
 
     if (error) throw error;
@@ -65,21 +64,26 @@ export const buscar = async (empresaId, filtros = {}) => {
  */
 export const crear = async (datos) => {
   try {
-    const { data, error } = await supabase.rpc('agregar_cuenta', {
-      p_empresa_id: datos.empresa_id,
-      p_codigo: datos.codigo,
-      p_nombre: datos.nombre,
-      p_cuenta_padre_id: datos.cuenta_padre_id || null,
-      p_nivel: datos.nivel,
-      p_tipo_cuenta: datos.tipo_cuenta,
-      p_naturaleza: datos.naturaleza,
-      p_es_imputable: datos.es_imputable || false,
-      p_requiere_tercero: datos.requiere_tercero || false,
-      p_requiere_documento: datos.requiere_documento || false,
-      p_categoria_iva: datos.categoria_iva || null,
-      p_codigo_impositivo: datos.codigo_impositivo || null,
-      p_descripcion: datos.descripcion || null
-    });
+    const { data, error } = await supabase
+      .from('plan_cuentas')
+      .insert({
+        empresa_id: datos.empresa_id,
+        codigo: datos.codigo,
+        nombre: datos.nombre,
+        cuenta_padre_id: datos.cuenta_padre_id || null,
+        nivel: datos.nivel,
+        tipo_cuenta: datos.tipo_cuenta,
+        naturaleza: datos.naturaleza,
+        es_imputable: datos.es_imputable || false,
+        requiere_tercero: datos.requiere_tercero || false,
+        requiere_documento: datos.requiere_documento || false,
+        categoria_iva: datos.categoria_iva || null,
+        codigo_impositivo: datos.codigo_impositivo || null,
+        descripcion: datos.descripcion || null,
+        estado: 'activa'
+      })
+      .select()
+      .single();
 
     if (error) throw error;
 
@@ -101,20 +105,25 @@ export const crear = async (datos) => {
  */
 export const actualizar = async (id, datos) => {
   try {
-    const { data, error } = await supabase.rpc('actualizar_cuenta', {
-      p_id: id,
-      p_codigo: datos.codigo,
-      p_nombre: datos.nombre,
-      p_cuenta_padre_id: datos.cuenta_padre_id,
-      p_tipo_cuenta: datos.tipo_cuenta,
-      p_naturaleza: datos.naturaleza,
-      p_es_imputable: datos.es_imputable,
-      p_requiere_tercero: datos.requiere_tercero,
-      p_requiere_documento: datos.requiere_documento,
-      p_categoria_iva: datos.categoria_iva,
-      p_codigo_impositivo: datos.codigo_impositivo,
-      p_descripcion: datos.descripcion
-    });
+    const { data, error } = await supabase
+      .from('plan_cuentas')
+      .update({
+        codigo: datos.codigo,
+        nombre: datos.nombre,
+        cuenta_padre_id: datos.cuenta_padre_id || null,
+        tipo_cuenta: datos.tipo_cuenta,
+        naturaleza: datos.naturaleza,
+        es_imputable: datos.es_imputable,
+        requiere_tercero: datos.requiere_tercero,
+        requiere_documento: datos.requiere_documento,
+        categoria_iva: datos.categoria_iva,
+        codigo_impositivo: datos.codigo_impositivo,
+        descripcion: datos.descripcion,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) throw error;
 
@@ -136,9 +145,15 @@ export const actualizar = async (id, datos) => {
  */
 export const eliminar = async (id) => {
   try {
-    const { data, error } = await supabase.rpc('eliminar_cuenta', {
-      p_id: id
-    });
+    const { data, error } = await supabase
+      .from('plan_cuentas')
+      .update({
+        estado: 'inactiva',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) throw error;
 
@@ -160,15 +175,17 @@ export const eliminar = async (id) => {
  */
 export const obtenerPorId = async (id) => {
   try {
-    const { data, error } = await supabase.rpc('obtener_cuenta_por_id', {
-      p_id: id
-    });
+    const { data, error } = await supabase
+      .from('plan_cuentas')
+      .select('*')
+      .eq('id', id)
+      .single();
 
     if (error) throw error;
 
     return {
       success: true,
-      data: data ? data[0] : null
+      data: data
     };
   } catch (error) {
     console.error('Error en obtener cuenta:', error);
@@ -207,10 +224,11 @@ export const copiarPlantilla = async (empresaId, tipo) => {
 /**
  * Eliminar todo el plan de cuentas
  */
-export const eliminarTodo = async (empresaId) => {
+export const eliminarTodo = async (empresaId, usuarioId) => {
   try {
     const { data, error } = await supabase.rpc('eliminar_todo_plan_cuentas', {
-      p_empresa_id: empresaId
+      p_empresa_id: empresaId,
+      p_usuario_id: usuarioId
     });
 
     if (error) throw error;
@@ -229,26 +247,73 @@ export const eliminarTodo = async (empresaId) => {
 };
 
 /**
- * Obtener cuentas padres disponibles
+ * Obtener cuentas padres disponibles (solo no imputables)
  */
-export const obtenerCuentasPadres = async (empresaId, nivel) => {
+export const obtenerCuentasPadres = async (empresaId) => {
   try {
     const { data, error } = await supabase
       .from('plan_cuentas')
       .select('id, codigo, nombre, nivel')
       .eq('empresa_id', empresaId)
-      .eq('activo', true)
-      .lt('nivel', nivel)
+      .eq('estado', 'activa')
+      .eq('es_imputable', false)  // Solo cuentas no imputables pueden ser padres
       .order('codigo');
 
     if (error) throw error;
 
     return {
       success: true,
-      data: data || []
+      data: (data || []).map(cuenta => ({
+        value: cuenta.id,
+        label: `${cuenta.codigo} - ${cuenta.nombre}`
+      }))
     };
   } catch (error) {
     console.error('Error en obtener cuentas padres:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Obtener cuentas imputables (para asientos)
+ */
+export const obtenerCuentasImputables = async (empresaId, busqueda = null) => {
+  try {
+    if (busqueda) {
+      // Usar función existente de Supabase
+      const { data, error } = await supabase.rpc('obtener_cuentas_imputables', {
+        p_empresa_id: empresaId,
+        p_busqueda: busqueda
+      });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        data: data || []
+      };
+    } else {
+      // Query directa para todas
+      const { data, error } = await supabase
+        .from('plan_cuentas')
+        .select('id, codigo, nombre, tipo_cuenta, naturaleza')
+        .eq('empresa_id', empresaId)
+        .eq('estado', 'activa')
+        .eq('es_imputable', true)
+        .order('codigo');
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        data: data || []
+      };
+    }
+  } catch (error) {
+    console.error('Error en obtener cuentas imputables:', error);
     return {
       success: false,
       error: error.message
@@ -298,5 +363,6 @@ export default {
   copiarPlantilla,
   eliminarTodo,
   obtenerCuentasPadres,
+  obtenerCuentasImputables,
   validarCodigoUnico
 };
