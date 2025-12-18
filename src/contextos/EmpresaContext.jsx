@@ -1,110 +1,96 @@
-/**
- * CONTEXT: Empresa Activa
- * Gestiona la empresa actual del usuario y sus empresas disponibles
- */
+// src/contextos/EmpresaContext.jsx
+import { createContext, useContext, useState, useEffect } from 'react'
 
-import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../configuracion/supabase';
-
-const EmpresaContext = createContext();
-
-export const EmpresaProvider = ({ children }) => {
-  const [empresaActual, setEmpresaActual] = useState(null);
-  const [empresasDisponibles, setEmpresasDisponibles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    cargarEmpresas();
-  }, []);
-
-  const cargarEmpresas = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Obtener usuario actual
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) throw userError;
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      // Obtener empresas del usuario
-      const { data: empresas, error: empresasError } = await supabase
-        .from('empresas')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .eq('estado', 'activa')
-        .order('created_at', { ascending: true });
-
-      if (empresasError) throw empresasError;
-
-      setEmpresasDisponibles(empresas || []);
-
-      // Cargar empresa activa desde localStorage o usar la primera
-      const empresaGuardadaId = localStorage.getItem('empresa_actual_id');
-      
-      let empresaInicial = null;
-      if (empresaGuardadaId) {
-        empresaInicial = empresas?.find(e => e.id === empresaGuardadaId);
-      }
-      
-      if (!empresaInicial && empresas && empresas.length > 0) {
-        empresaInicial = empresas[0];
-      }
-      
-      if (empresaInicial) {
-        setEmpresaActual(empresaInicial);
-        localStorage.setItem('empresa_actual_id', empresaInicial.id);
-      }
-
-    } catch (error) {
-      console.error('Error cargando empresas:', error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cambiarEmpresa = (empresaId) => {
-    const empresa = empresasDisponibles.find(e => e.id === empresaId);
-    if (empresa) {
-      setEmpresaActual(empresa);
-      localStorage.setItem('empresa_actual_id', empresa.id);
-      
-      // Recargar la página para actualizar todos los datos
-      window.location.reload();
-    }
-  };
-
-  const recargarEmpresas = async () => {
-    await cargarEmpresas();
-  };
-
-  return (
-    <EmpresaContext.Provider value={{
-      empresaActual,
-      empresasDisponibles,
-      cambiarEmpresa,
-      recargarEmpresas,
-      loading,
-      error
-    }}>
-      {children}
-    </EmpresaContext.Provider>
-  );
-};
+const EmpresaContext = createContext()
 
 export const useEmpresa = () => {
-  const context = useContext(EmpresaContext);
+  const context = useContext(EmpresaContext)
   if (!context) {
-    throw new Error('useEmpresa debe usarse dentro de EmpresaProvider');
+    throw new Error('useEmpresa debe usarse dentro de un EmpresaProvider')
   }
-  return context;
-};
+  return context
+}
 
-export default EmpresaContext;
+export const EmpresaProvider = ({ children }) => {
+  const [empresaActual, setEmpresaActual] = useState(null)
+  const [periodoActual, setPeriodoActual] = useState(null)
+  const [rolActual, setRolActual] = useState(null)
+
+  // Cargar desde localStorage al montar
+  useEffect(() => {
+    const empresaGuardada = localStorage.getItem('contaapi-empresa')
+    const periodoGuardado = localStorage.getItem('contaapi-periodo')
+    const rolGuardado = localStorage.getItem('contaapi-rol')
+
+    if (empresaGuardada) {
+      try {
+        setEmpresaActual(JSON.parse(empresaGuardada))
+      } catch (error) {
+        console.error('Error parseando empresa:', error)
+      }
+    }
+
+    if (periodoGuardado) {
+      try {
+        setPeriodoActual(JSON.parse(periodoGuardado))
+      } catch (error) {
+        console.error('Error parseando periodo:', error)
+      }
+    }
+
+    if (rolGuardado) {
+      setRolActual(rolGuardado)
+    }
+  }, [])
+
+  const establecerContexto = (empresa, periodo, rol) => {
+    setEmpresaActual(empresa)
+    setPeriodoActual(periodo)
+    setRolActual(rol)
+
+    // Guardar en localStorage
+    localStorage.setItem('contaapi-empresa', JSON.stringify(empresa))
+    localStorage.setItem('contaapi-periodo', JSON.stringify(periodo))
+    localStorage.setItem('contaapi-rol', rol)
+  }
+
+  const limpiarContexto = () => {
+    setEmpresaActual(null)
+    setPeriodoActual(null)
+    setRolActual(null)
+
+    // Limpiar localStorage
+    localStorage.removeItem('contaapi-empresa')
+    localStorage.removeItem('contaapi-periodo')
+    localStorage.removeItem('contaapi-rol')
+  }
+
+  const actualizarEmpresa = (empresa) => {
+    setEmpresaActual(empresa)
+    localStorage.setItem('contaapi-empresa', JSON.stringify(empresa))
+  }
+
+  const actualizarPeriodo = (periodo) => {
+    setPeriodoActual(periodo)
+    localStorage.setItem('contaapi-periodo', JSON.stringify(periodo))
+  }
+
+  const value = {
+    empresaActual,
+    periodoActual,
+    rolActual,
+    establecerContexto,
+    limpiarContexto,
+    actualizarEmpresa,
+    actualizarPeriodo,
+    tieneContexto: empresaActual && periodoActual && rolActual
+  }
+
+  return (
+    <EmpresaContext.Provider value={value}>
+      {children}
+    </EmpresaContext.Provider>
+  )
+}
+
+export default EmpresaContext
