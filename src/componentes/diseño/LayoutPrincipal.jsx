@@ -3,16 +3,16 @@
  * Layout base con header que incluye selector de empresa
  */
 
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEmpresa } from '../../contextos/EmpresaContext';
 import { SelectorEmpresa } from './SelectorEmpresa';
 import { Moon, Sun, LogOut, User, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../configuracion/supabase';
 
-export const LayoutPrincipal = () => {
+export const LayoutPrincipal = ({ children }) => {  // ← CAMBIO: Recibe children
   const navigate = useNavigate();
-  const { empresaActual, loading: loadingEmpresa } = useEmpresa();
+  const { empresaActual } = useEmpresa();
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true';
   });
@@ -44,7 +44,9 @@ export const LayoutPrincipal = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem('empresa_actual_id');
+    localStorage.removeItem('contaapi-empresa');
+    localStorage.removeItem('contaapi-periodo');
+    localStorage.removeItem('contaapi-rol');
     navigate('/login');
   };
 
@@ -75,7 +77,7 @@ export const LayoutPrincipal = () => {
 
             {/* Selector de Empresa (Centro) */}
             <div className="hidden md:flex items-center justify-center flex-1 px-4">
-              {!loadingEmpresa && <SelectorEmpresa />}
+              {empresaActual && <SelectorEmpresa />}
             </div>
 
             {/* Acciones del usuario */}
@@ -115,26 +117,22 @@ export const LayoutPrincipal = () => {
 
           {/* Selector de Empresa (Mobile) */}
           <div className="md:hidden pb-3">
-            {!loadingEmpresa && <SelectorEmpresa />}
+            {empresaActual && <SelectorEmpresa />}
           </div>
         </div>
       </header>
 
       {/* Contenido principal */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {loadingEmpresa ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : empresaActual ? (
-          <Outlet />
+        {empresaActual ? (
+          children  // ← CAMBIO: Usa children en lugar de Outlet
         ) : (
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               No hay empresas disponibles
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Por favor, crea una empresa para continuar
+              Por favor, selecciona una empresa para continuar
             </p>
           </div>
         )}
